@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clarquey — Invoice Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0f0f0f;
+  --surface: #181818;
+  --surface2: #222;
+  --border: #2a2a2a;
+  --accent: #d4f500;
+  --accent-dim: #a8c200;
+  --text: #f0f0f0;
+  --text-muted: #666;
+  --text-dim: #999;
+  --danger: #ff4d4d;
+  --success: #4dff91;
+}
+
+body {
+  font-family: 'Syne', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── TOPBAR ── */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 32px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.topbar-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+  font-family: 'DM Mono', monospace;
+}
+
+/* ── LAYOUT ── */
+.app {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  min-height: calc(100vh - 57px);
+}
+
+/* ── SIDEBAR / FORM ── */
+.sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 28px 28px 60px;
+}
+
+.section-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 14px;
+  margin-top: 28px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.section-label:first-child { margin-top: 0; }
+
+.field {
+  margin-bottom: 14px;
+}
+
+.field label {
+  display: block;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+
+.field input,
+.field textarea,
+.field select {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  padding: 10px 12px;
+  outline: none;
+  transition: border-color 0.15s;
+  appearance: none;
+}
+
+.field input:focus,
+.field textarea:focus,
+.field select:focus {
+  border-color: var(--accent);
+}
+
+.field textarea {
+  resize: vertical;
+  min-height: 72px;
+  line-height: 1.6;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+/* Template selector */
+.template-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.tpl-btn {
+  padding: 10px 6px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-muted);
+  font-family: 'Syne', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.tpl-btn:hover { border-color: var(--accent-dim); color: var(--text); }
+.tpl-btn.active { background: var(--accent); border-color: var(--accent); color: #000; }
+
+.tpl-desc {
+  font-size: 10px;
+  color: var(--text-muted);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 12px;
+  line-height: 1.7;
+  margin-bottom: 20px;
+  font-family: 'DM Mono', monospace;
+}
+
+/* Computed values */
+.computed-box {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 14px;
+  margin-bottom: 14px;
+}
+
+.computed-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+  font-size: 11px;
+  border-bottom: 1px solid var(--border);
+}
+
+.computed-row:last-child { border-bottom: none; }
+
+.computed-label { color: var(--text-dim); font-family: 'DM Mono', monospace; }
+.computed-value { font-weight: 700; color: var(--text); font-family: 'DM Mono', monospace; }
+.computed-row.accent .computed-value { color: var(--accent); }
+.computed-row.green .computed-value { color: var(--success); }
+.computed-row.paid .computed-label { color: var(--success); }
+
+/* Action buttons */
+.btn-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 28px;
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 20px;
+  border-radius: 6px;
+  font-family: 'Syne', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #000;
+}
+.btn-primary:hover { background: #c8e800; transform: translateY(-1px); }
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+}
+.btn-secondary:hover { border-color: var(--text-dim); color: var(--text); }
+
+.btn-wa {
+  background: #25d366;
+  color: #fff;
+}
+.btn-wa:hover { background: #20b857; }
+
+/* invoice no preview */
+.inv-no-preview {
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  color: var(--accent);
+  font-weight: 700;
+  padding: 10px 12px;
+  background: var(--surface2);
+  border: 1px dashed var(--accent-dim);
+  border-radius: 6px;
+  margin-bottom: 14px;
+}
+
+/* ── PREVIEW PANEL ── */
+.preview-panel {
+  background: #111;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 24px 80px;
+}
+
+.preview-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+  align-self: flex-start;
+}
+
+/* ── INVOICE PRINT STYLES ── */
+#invoice-preview {
+  width: 620px;
+  background: #fff;
+  padding: 40px 44px;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.7);
+  font-family: 'Syne', sans-serif;
+  color: #111;
+  flex-shrink: 0;
+}
+
+.inv-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 28px;
+}
+
+.inv-logo {
+  width: 110px;
+  height: 80px;
+  background: #1a1a1a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.inv-logo-text {
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+}
+
+.inv-company { text-align: right; }
+
+.inv-company-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #999;
+  margin-bottom: 6px;
+}
+
+.inv-company-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #111;
+  margin-bottom: 8px;
+}
+
+.inv-company-address {
+  font-size: 8.5px;
+  color: #666;
+  line-height: 1.8;
+}
+
+.inv-billto-bar {
+  background: #f5f5f5;
+  padding: 14px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.inv-billto-label {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #999;
+  margin-bottom: 6px;
+}
+
+.inv-client-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #111;
+  margin-bottom: 2px;
+}
+
+.inv-client-wa { font-size: 10px; color: #555; }
+
+.inv-meta-right { text-align: right; }
+
+.inv-meta-row {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 4px;
+}
+
+.inv-meta-label {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #999;
+}
+
+.inv-meta-value {
+  font-size: 11px;
+  font-weight: 700;
+  color: #111;
+  min-width: 100px;
+  text-align: right;
+}
+
+.badge-pending { color: #b45309; }
+.badge-balance { color: #1d4ed8; }
+.badge-settled { color: #166534; }
+
+.inv-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.inv-table thead tr { border-bottom: 2px solid #111; }
+
+.inv-table thead th {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #111;
+  padding: 8px 8px 10px;
+  text-align: left;
+}
+
+.inv-table thead th.right { text-align: right; }
+
+.inv-table tbody tr { border-bottom: 1px solid #e8e8e8; }
+
+.inv-table tbody td {
+  padding: 16px 8px;
+  font-size: 10px;
+  color: #333;
+  vertical-align: top;
+  line-height: 1.6;
+}
+
+.inv-table tbody td.right { text-align: right; white-space: nowrap; }
+
+.item-title {
+  font-weight: 700;
+  font-size: 11px;
+  color: #111;
+  margin-bottom: 4px;
+  line-height: 1.5;
+}
+
+.item-detail {
+  font-size: 9.5px;
+  color: #555;
+  line-height: 1.7;
+}
+
+.inv-totals {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.inv-totals-table { width: 280px; }
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 7px 8px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.total-row.amount-due {
+  background: #111;
+  border-bottom: none;
+  margin-top: 4px;
+  padding: 10px 12px;
+}
+
+.total-label { font-size: 10px; color: #666; font-weight: 500; }
+.total-value { font-size: 10px; font-weight: 600; color: #111; }
+
+.total-row.amount-due .total-label,
+.total-row.amount-due .total-value { color: #fff; font-size: 11px; font-weight: 700; }
+
+.paid-text { color: #16a34a; }
+.paid-label { color: #16a34a !important; }
+
+.inv-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-top: 28px;
+}
+
+.inv-section-title {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #111;
+  margin-bottom: 8px;
+}
+
+.inv-bank-name { font-size: 10.5px; font-weight: 700; color: #111; margin-bottom: 2px; }
+.inv-bank-no { font-size: 10px; color: #333; line-height: 1.7; }
+
+.inv-signature { text-align: center; min-width: 180px; }
+.inv-sign-greeting { font-size: 9px; color: #555; margin-bottom: 2px; }
+.inv-sign-company { font-size: 9px; font-weight: 700; color: #111; margin-bottom: 28px; }
+
+.inv-sign-logo {
+  width: 90px;
+  height: 34px;
+  background: #1a1a1a;
+  margin: 0 auto 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.inv-sign-logo-text { color: #fff; font-size: 7px; font-weight: 700; letter-spacing: 0.2em; }
+.inv-sign-name { font-size: 9px; font-weight: 700; color: #111; text-decoration: underline; margin-top: 4px; }
+.inv-sign-title { font-size: 8px; color: #888; margin-top: 2px; }
+
+.inv-terms { margin-top: 24px; }
+
+.inv-terms-list { list-style: none; padding: 0; }
+
+.inv-terms-list li {
+  font-size: 8px;
+  color: #555;
+  line-height: 1.8;
+  padding-left: 12px;
+  position: relative;
+}
+
+.inv-terms-list li::before { content: "•"; position: absolute; left: 0; color: #999; }
+
+.inv-note { margin-top: 20px; padding-top: 14px; border-top: 1px solid #e8e8e8; }
+.inv-note-title { font-size: 8px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #111; margin-bottom: 6px; }
+.inv-note-text { font-size: 8px; color: #666; line-height: 1.8; }
+
+/* print */
+@media print {
+  body { background: white; }
+  .topbar, .sidebar, .preview-label { display: none; }
+  .app { display: block; }
+  .preview-panel { padding: 0; background: white; }
+  #invoice-preview { box-shadow: none; margin: 0; }
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">Clarquey</div>
+  <div class="topbar-sub">Invoice Generator — Phase 1+2</div>
+</div>
+
+<div class="app">
+
+  <!-- ══ SIDEBAR ══ -->
+  <div class="sidebar">
+
+    <div class="section-label">Template</div>
+
+    <div class="template-tabs">
+      <div class="tpl-btn active" onclick="setTemplate('dp', this)">DP 50%</div>
+      <div class="tpl-btn" onclick="setTemplate('pel', this)">Pelunasan</div>
+      <div class="tpl-btn" onclick="setTemplate('set', this)">Settled</div>
+    </div>
+
+    <div class="tpl-desc" id="tpl-desc">
+      Invoice tagihan uang muka 50%. Dikirim sebelum project dimulai.
+    </div>
+
+    <div class="section-label">Nomor Invoice</div>
+
+    <div class="field-row">
+      <div class="field">
+        <label>Bulan (MM)</label>
+        <input type="text" id="inv-mm" maxlength="2" placeholder="05" oninput="updateInvoiceNo()">
+      </div>
+      <div class="field">
+        <label>Tahun (YY)</label>
+        <input type="text" id="inv-yy" maxlength="2" placeholder="25" oninput="updateInvoiceNo()">
+      </div>
+    </div>
+    <div class="field">
+      <label>Urutan</label>
+      <input type="text" id="inv-seq" maxlength="3" placeholder="001" oninput="updateInvoiceNo()">
+    </div>
+    <div class="inv-no-preview" id="inv-no-display">CQ-0525-001</div>
+
+    <div class="section-label">Data Client</div>
+
+    <div class="field">
+      <label>Nama Client</label>
+      <input type="text" id="client-name" placeholder="PT. Maju Bersama" oninput="renderPreview()">
+    </div>
+    <div class="field">
+      <label>Nomor WhatsApp</label>
+      <input type="text" id="client-wa" placeholder="+6281234567890" oninput="renderPreview()">
+    </div>
+
+    <div class="section-label">Tanggal Invoice</div>
+
+    <div class="field">
+      <label>Tanggal</label>
+      <input type="date" id="inv-date" oninput="renderPreview()">
+    </div>
+
+    <div class="section-label">Deskripsi Project</div>
+
+    <div class="field">
+      <label>Judul (bold)</label>
+      <input type="text" id="proj-title" placeholder="Wedding Videography – Ahmad & Siti" oninput="renderPreview()">
+    </div>
+    <div class="field">
+      <label>Detail</label>
+      <textarea id="proj-detail" placeholder="Full day coverage, 2 kamera, aerial drone, highlights film 5-7 menit, same day edit teaser" oninput="renderPreview()"></textarea>
+    </div>
+
+    <div class="section-label">Harga</div>
+
+    <div class="field">
+      <label>Total Project (Rp)</label>
+      <input type="number" id="total-price" placeholder="5000000" oninput="updateCalc()">
+    </div>
+
+    <div class="computed-box" id="computed-box">
+      <!-- filled by JS -->
+    </div>
+
+    <div class="section-label">Aksi</div>
+
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="downloadPDF()">
+        ↓ Download PDF
+      </button>
+      <button class="btn btn-wa" id="btn-wa" onclick="sendWA()">
+        ✉ Kirim ke WhatsApp
+      </button>
+      <button class="btn btn-secondary" onclick="resetForm()">
+        ↺ Reset Form
+      </button>
+    </div>
+
+  </div>
+
+  <!-- ══ PREVIEW ══ -->
+  <div class="preview-panel">
+    <div class="preview-label">Preview Real-time</div>
+    <div id="invoice-preview">
+      <!-- rendered by JS -->
+    </div>
+  </div>
+
+</div>
+
+<script>
+let currentTemplate = 'dp';
+
+const tplDescs = {
+  dp: 'Invoice tagihan uang muka 50%. Dikirim sebelum project dimulai.',
+  pel: 'Invoice pelunasan 50% sisa tagihan. Dikirim setelah video selesai diambil.',
+  set: 'Invoice konfirmasi lunas. Semua pembayaran sudah diterima.'
+};
+
+function setTemplate(tpl, el) {
+  currentTemplate = tpl;
+  document.querySelectorAll('.tpl-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tpl-desc').textContent = tplDescs[tpl];
+  updateCalc();
+}
+
+function fmt(n) {
+  if (!n || isNaN(n)) return 'Rp 0';
+  return 'Rp ' + Math.round(n).toLocaleString('id-ID');
+}
+
+function getValues() {
+  const mm = document.getElementById('inv-mm').value || '05';
+  const yy = document.getElementById('inv-yy').value || '25';
+  const seq = document.getElementById('inv-seq').value || '001';
+  const invNo = `CQ-${mm}${yy}-${seq.padStart(3,'0')}`;
+
+  const rawDate = document.getElementById('inv-date').value;
+  let invDate = '';
+  if (rawDate) {
+    const d = new Date(rawDate);
+    invDate = d.toLocaleDateString('id-ID', { day:'2-digit', month:'long', year:'numeric' });
+  }
+
+  const total = parseFloat(document.getElementById('total-price').value) || 0;
+  const dp = total * 0.5;
+  const sisa = total - dp;
+
+  return {
+    invNo,
+    invDate,
+    clientName: document.getElementById('client-name').value,
+    clientWA: document.getElementById('client-wa').value,
+    projTitle: document.getElementById('proj-title').value,
+    projDetail: document.getElementById('proj-detail').value,
+    total, dp, sisa
+  };
+}
+
+function updateInvoiceNo() {
+  const mm = document.getElementById('inv-mm').value || '??';
+  const yy = document.getElementById('inv-yy').value || '??';
+  const seq = (document.getElementById('inv-seq').value || '001').padStart(3,'0');
+  document.getElementById('inv-no-display').textContent = `CQ-${mm}${yy}-${seq}`;
+  renderPreview();
+}
+
+function updateCalc() {
+  const { total, dp, sisa } = getValues();
+  const tpl = currentTemplate;
+  let rows = '';
+
+  if (tpl === 'dp') {
+    rows = `
+      <div class="computed-row"><span class="computed-label">Total Project</span><span class="computed-value">${fmt(total)}</span></div>
+      <div class="computed-row accent"><span class="computed-label">Down Payment 50%</span><span class="computed-value">${fmt(dp)}</span></div>
+      <div class="computed-row"><span class="computed-label">Sisa (nanti)</span><span class="computed-value">${fmt(sisa)}</span></div>
+    `;
+  } else if (tpl === 'pel') {
+    rows = `
+      <div class="computed-row"><span class="computed-label">Total Project</span><span class="computed-value">${fmt(total)}</span></div>
+      <div class="computed-row paid"><span class="computed-label">DP 50% ✓ PAID</span><span class="computed-value paid-label">${fmt(dp)}</span></div>
+      <div class="computed-row accent"><span class="computed-label">Sisa / Amount Due</span><span class="computed-value">${fmt(sisa)}</span></div>
+    `;
+  } else {
+    rows = `
+      <div class="computed-row"><span class="computed-label">Total Project</span><span class="computed-value">${fmt(total)}</span></div>
+      <div class="computed-row paid"><span class="computed-label">DP 50% ✓ PAID</span><span class="computed-value paid-label">${fmt(dp)}</span></div>
+      <div class="computed-row paid"><span class="computed-label">Sisa ✓ PAID</span><span class="computed-value paid-label">${fmt(sisa)}</span></div>
+      <div class="computed-row green"><span class="computed-label">SETTLED ✓</span><span class="computed-value">${fmt(total)}</span></div>
+    `;
+  }
+
+  document.getElementById('computed-box').innerHTML = rows;
+  renderPreview();
+}
+
+function renderPreview() {
+  const v = getValues();
+  const tpl = currentTemplate;
+
+  let statusBadge = '';
+  let statusText = '';
+  if (tpl === 'dp') { statusBadge = 'badge-pending'; statusText = 'Pending'; }
+  else if (tpl === 'pel') { statusBadge = 'badge-balance'; statusText = 'Pending Balance'; }
+  else { statusBadge = 'badge-settled'; statusText = 'Settled'; }
+
+  // Totals block
+  let totalsHtml = '';
+  if (tpl === 'dp') {
+    totalsHtml = `
+      <div class="total-row"><span class="total-label">Subtotal</span><span class="total-value">${fmt(v.total)}</span></div>
+      <div class="total-row"><span class="total-label">Down Payment 50%</span><span class="total-value">${fmt(v.dp)}</span></div>
+      <div class="total-row amount-due"><span class="total-label">Amount Due</span><span class="total-value">${fmt(v.dp)}</span></div>
+    `;
+  } else if (tpl === 'pel') {
+    totalsHtml = `
+      <div class="total-row"><span class="total-label">Subtotal</span><span class="total-value">${fmt(v.total)}</span></div>
+      <div class="total-row"><span class="total-label paid-label">Down Payment 50% &nbsp;✓ PAID</span><span class="total-value paid-text">${fmt(v.dp)}</span></div>
+      <div class="total-row"><span class="total-label">Remaining Payment</span><span class="total-value">${fmt(v.sisa)}</span></div>
+      <div class="total-row amount-due"><span class="total-label">Amount Due</span><span class="total-value">${fmt(v.sisa)}</span></div>
+    `;
+  } else {
+    totalsHtml = `
+      <div class="total-row"><span class="total-label">Subtotal</span><span class="total-value">${fmt(v.total)}</span></div>
+      <div class="total-row"><span class="total-label paid-label">Down Payment 50% &nbsp;✓ PAID</span><span class="total-value paid-text">${fmt(v.dp)}</span></div>
+      <div class="total-row"><span class="total-label paid-label">Remaining Payment &nbsp;✓ PAID</span><span class="total-value paid-text">${fmt(v.sisa)}</span></div>
+      <div class="total-row amount-due"><span class="total-label">Settled ✓</span><span class="total-value">${fmt(v.total)}</span></div>
+    `;
+  }
+
+  // Payment instruction (hidden on settled)
+  const paymentHtml = tpl !== 'set' ? `
+    <div class="inv-payment">
+      <div class="inv-section-title">Payment Instruction:</div>
+      <div class="inv-bank-name">Bank Transfer</div>
+      <div class="inv-bank-no">SMBCI: 90014746343<br>JULI ISKANDAR ZAKAT</div>
+    </div>
+  ` : '<div style="flex:1"></div>';
+
+  // Terms
+  let termsItems = [];
+  if (tpl === 'dp') {
+    termsItems = [
+      'Silahkan melakukan pembayaran uang muka sebesar 50% dari seluruh perkiraan biaya selambat-lambatnya 13 (tiga belas) hari sebelum project dimulai',
+      'Uang muka tidak dapat ditarik kembali dengan alasan apapun',
+      'Sisa pembayaran diharapkan dapat dilunasi 3 (tiga) hari setelah pengambilan video di lapangan selesai',
+      'FREE 1x revisi musik & video',
+      'Final output diserahkan via Google Drive',
+      'Musik berlisensi (free copyright)',
+      'Deadline per project max. 30 (tiga puluh) hari diluar revisi',
+      'Harga yang tertera berlaku untuk 7 (tujuh) jam kerja dalam 1 (satu) hari',
+      'Tagihan ini dianggap sah sebagai kwitansi pembayaran',
+      'Konfirmasi pembayaran dengan mengirimkan struk atau bukti transfer lainnya'
+    ];
+  } else if (tpl === 'pel') {
+    termsItems = [
+      'Silahkan melakukan pelunasan sisa tagihan sebesar 50% dari seluruh perkiraan biaya selambat-lambatnya 3 (tiga) hari setelah invoice ini diterbitkan',
+      'FREE 1x revisi musik & video',
+      'Final output diserahkan via Google Drive',
+      'Musik berlisensi (free copyright)',
+      'Deadline per project max. 30 (tiga puluh) hari diluar revisi',
+      'Tagihan ini dianggap sah sebagai kwitansi pembayaran',
+      'Konfirmasi pembayaran dengan mengirimkan struk atau bukti transfer lainnya'
+    ];
+  } else {
+    termsItems = [
+      'Terima kasih karena telah memenuhi pelunasan atas sisa tagihan pada transaksi ini',
+      'Pembayaran sudah diterima oleh PIHAK VENDOR dan tagihan ini dianggap sah sebagai kwitansi pembayaran',
+      'Adapun syarat dan ketentuan yang telah disepakati akan tetap berlaku hingga project dinyatakan selesai',
+      'Semoga kerjasama ini dapat terjalin dalam jangka waktu yang panjang'
+    ];
+  }
+
+  const termsHtml = termsItems.map(t => `<li>${t}</li>`).join('');
+
+  let noteText = '';
+  if (tpl === 'dp') noteText = 'Dengan melakukan pembayaran Uang Muka, maka Client telah menyetujui Syarat dan Ketentuan yang berlaku sebagaimana yang tersebut di atas.';
+  else if (tpl === 'pel') noteText = 'Dengan melakukan pelunasan, maka Client dianggap telah menyetujui Syarat dan Ketentuan yang telah disepakati sebelumnya.';
+  else noteText = 'Tagihan ini merupakan kwitansi resmi atas pelunasan penuh yang telah diterima. Project akan dilanjutkan sesuai timeline yang telah disepakati.';
+
+  const clientName = v.clientName || '<span style="color:#bbb;font-style:italic">Nama Client</span>';
+  const clientWA = v.clientWA || '<span style="color:#bbb;font-style:italic">Nomor WA</span>';
+  const projTitle = v.projTitle || '<span style="color:#bbb;font-style:italic">Judul Project</span>';
+  const projDetail = v.projDetail || '<span style="color:#bbb;font-style:italic">Detail project...</span>';
+  const invDate = v.invDate || '<span style="color:#bbb;font-style:italic">–</span>';
+
+  document.getElementById('invoice-preview').innerHTML = `
+    <div class="inv-header">
+      <div class="inv-logo"><span class="inv-logo-text">CLARQUEY</span></div>
+      <div class="inv-company">
+        <div class="inv-company-label">Invoice</div>
+        <div class="inv-company-name">CLARQUEY Video &amp; Film Production</div>
+        <div class="inv-company-address">
+          Jl. Handil Tiga, Komp. Nur Aisya Lestari II, RT. 2, RW. 1, No. 3<br>
+          Kel. Manarap Baru, Kec. Kertak Hanyar, Kabupaten Banjar<br>
+          Kalimantan Selatan 70654<br>
+          +6282252445233 &nbsp;|&nbsp; clarquey.info@gmail.com
+        </div>
+      </div>
+    </div>
+
+    <div class="inv-billto-bar">
+      <div class="inv-billto-left">
+        <div class="inv-billto-label">Bill To</div>
+        <div class="inv-client-name">${clientName}</div>
+        <div class="inv-client-wa">${clientWA}</div>
+      </div>
+      <div class="inv-meta-right">
+        <div class="inv-meta-row">
+          <span class="inv-meta-label">Invoice #</span>
+          <span class="inv-meta-value">${v.invNo}</span>
+        </div>
+        <div class="inv-meta-row">
+          <span class="inv-meta-label">Date</span>
+          <span class="inv-meta-value">${invDate}</span>
+        </div>
+        <div class="inv-meta-row">
+          <span class="inv-meta-label">Status</span>
+          <span class="inv-meta-value ${statusBadge}">${statusText}</span>
+        </div>
+      </div>
+    </div>
+
+    <table class="inv-table">
+      <thead>
+        <tr>
+          <th style="width:50%">Item</th>
+          <th class="right" style="width:12%">Qty</th>
+          <th class="right" style="width:19%">Price</th>
+          <th class="right" style="width:19%">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <div class="item-title">${projTitle}</div>
+            <div class="item-detail">${projDetail}</div>
+          </td>
+          <td class="right">1</td>
+          <td class="right">${fmt(v.total)}</td>
+          <td class="right">${fmt(v.total)}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="inv-totals">
+      <div class="inv-totals-table">${totalsHtml}</div>
+    </div>
+
+    <div class="inv-bottom">
+      ${paymentHtml}
+      <div class="inv-signature">
+        <div class="inv-sign-greeting">Salam Hangat,</div>
+        <div class="inv-sign-company">CLARQUEY Multimedia</div>
+        <div style="font-size:9px;color:#999;font-style:italic;margin-bottom:8px">[ tanda tangan ]</div>
+        <div class="inv-sign-logo"><span class="inv-sign-logo-text">CLARQUEY</span></div>
+        <div class="inv-sign-name">JULI ISKANDAR ZAKAT, S.Kom</div>
+        <div class="inv-sign-title">Creative Director</div>
+      </div>
+    </div>
+
+    <div class="inv-terms">
+      <div class="inv-section-title">Term &amp; Condition</div>
+      <ul class="inv-terms-list">${termsHtml}</ul>
+    </div>
+
+    <div class="inv-note">
+      <div class="inv-note-title">Note</div>
+      <div class="inv-note-text">${noteText}</div>
+    </div>
+  `;
+}
+
+function downloadPDF() {
+  const v = getValues();
+  const filename = `Invoice_${v.invNo}_${(v.clientName || 'Client').replace(/\s+/g,'_')}.pdf`;
+
+  const el = document.getElementById('invoice-preview');
+  const opt = {
+    margin: 0,
+    filename: filename,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+    jsPDF: { unit: 'px', format: [620, el.scrollHeight + 80], orientation: 'portrait' }
+  };
+
+  html2pdf().set(opt).from(el).save();
+}
+
+function sendWA() {
+  const v = getValues();
+  const wa = v.clientWA.replace(/[^0-9]/g, '');
+  if (!wa) { alert('Isi nomor WhatsApp client dulu!'); return; }
+
+  const tpl = currentTemplate;
+  let msg = '';
+
+  if (tpl === 'dp') {
+    msg = `Halo ${v.clientName || 'Kak'},\n\nTerima kasih atas kepercayaan Anda kepada CLARQUEY Video & Film Production 🎬\n\nBerikut kami kirimkan Invoice ${v.invNo} sebagai tagihan Uang Muka (DP) 50% untuk project:\n\n📌 *${v.projTitle || 'Project Anda'}*\n💰 Total Project: ${fmt(v.total)}\n💳 DP 50%: ${fmt(v.dp)}\n\nMohon melakukan pembayaran ke:\n🏦 SMBCI: 90014746343\n👤 JULI ISKANDAR ZAKAT\n\nSilakan kirimkan bukti transfer setelah pembayaran. Terima kasih 🙏\n\n— CLARQUEY Multimedia`;
+  } else if (tpl === 'pel') {
+    msg = `Halo ${v.clientName || 'Kak'},\n\nProses pengambilan video telah selesai dilaksanakan. Terima kasih atas kerjasamanya 🙏\n\nBerikut kami kirimkan Invoice ${v.invNo} sebagai tagihan Pelunasan untuk project:\n\n📌 *${v.projTitle || 'Project Anda'}*\n💰 Total Project: ${fmt(v.total)}\n✅ DP 50% sudah terbayar: ${fmt(v.dp)}\n💳 Sisa Pelunasan: ${fmt(v.sisa)}\n\nMohon melakukan pelunasan ke:\n🏦 SMBCI: 90014746343\n👤 JULI ISKANDAR ZAKAT\n\nSilakan kirimkan bukti transfer setelah pembayaran. Terima kasih 🙏\n\n— CLARQUEY Multimedia`;
+  } else {
+    msg = `Halo ${v.clientName || 'Kak'},\n\nPembayaran project telah kami terima dengan sempurna. Terima kasih! 🎉\n\nBerikut kami kirimkan Invoice ${v.invNo} sebagai kwitansi resmi atas pelunasan penuh untuk project:\n\n📌 *${v.projTitle || 'Project Anda'}*\n✅ Total Settled: ${fmt(v.total)}\n\nProject akan segera kami proses sesuai timeline yang disepakati. Semoga hasilnya memuaskan! 🎬\n\n— CLARQUEY Multimedia`;
+  }
+
+  const url = `https://wa.me/${wa}?text=${encodeURIComponent(msg)}`;
+  window.open(url, '_blank');
+}
+
+function resetForm() {
+  if (!confirm('Reset semua isian?')) return;
+  document.querySelectorAll('input, textarea').forEach(el => el.value = '');
+  document.getElementById('inv-no-display').textContent = 'CQ-????-001';
+  setTemplate('dp', document.querySelector('.tpl-btn'));
+  updateCalc();
+}
+
+// Init
+(function() {
+  const today = new Date();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const yy = String(today.getFullYear()).slice(-2);
+  document.getElementById('inv-mm').value = mm;
+  document.getElementById('inv-yy').value = yy;
+  document.getElementById('inv-seq').value = '001';
+  document.getElementById('inv-date').value = today.toISOString().split('T')[0];
+  updateInvoiceNo();
+  updateCalc();
+})();
+</script>
+</body>
+</html>

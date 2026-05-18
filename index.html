@@ -10,27 +10,33 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg: #0f0f0f;
-  --surface: #181818;
-  --surface2: #222;
-  --border: #2a2a2a;
-  --accent: #d4f500;
+  --bg:       #1c1c1c;
+  --surface:  #242424;
+  --surface2: #2e2e2e;
+  --border:   #393939;
+  --accent:   #f0ff00;
   --accent-dim: #a8c200;
-  --text: #f0f0f0;
-  --text-muted: #666;
+  --text:     #f0f0f0;
+  --text-muted: ##777;
   --text-dim: #999;
-  --danger: #ff4d4d;
-  --success: #4dff91;
+  --danger: #ff4545;
+  --success: #49adf4;
+  --wa:       #18ba55;
+  --radius:   19px;
+  --mono:     'DM Sans', sans-serif;
+  --sans:     'DM Sans', sans-serif;
 }
 
 body {
-  font-family: 'Syne', sans-serif;
+  font-family: var(--sans);
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-}
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+  }
 
 /* ── TOPBAR ── */
 .topbar {

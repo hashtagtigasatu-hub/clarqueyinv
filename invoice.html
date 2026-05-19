@@ -30,7 +30,38 @@ body { font-family: 'DM Sans', sans-serif; background: #fff; color: #111; }
 
 @media print {
   .print-btn { display: none; }
-  body { margin: 0; }
+  
+  /* Hilangkan header/footer URL bawaan browser */
+  @page {
+    margin: 0;
+    size: A4;
+  }
+  
+  body {
+    margin: 0;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  
+  .inv-wrap {
+    padding: 28px 36px;
+  }
+
+  /* Cegah NOTE terpotong ke halaman baru */
+  .inv-note {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .inv-terms {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Paksa semua konten dalam 1 halaman */
+  .inv-wrap {
+    page-break-after: avoid;
+  }
 }
 
 .inv-wrap {
@@ -95,6 +126,9 @@ body { font-family: 'DM Sans', sans-serif; background: #fff; color: #111; }
 .inv-note { margin-top: 20px; padding-top: 14px; border-top: 1px solid #e8e8e8; }
 .inv-note-title { font-size: 8px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #111; margin-bottom: 6px; }
 .inv-note-text { font-size: 8px; color: #666; line-height: 1.8; }
+
+
+  
 </style>
 </head>
 <body>

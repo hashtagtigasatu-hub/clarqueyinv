@@ -911,9 +911,16 @@ function renderPreview() {
   `;
 }
 
-function downloadPDF() {
+async function downloadPDF() {
   const v = getValues();
   const filename = `Invoice_${v.invNo}_${(v.clientName || 'Client').replace(/\s+/g,'_')}.pdf`;
+
+  // Simpan ke Sheets dulu
+  const btn = document.querySelector('.btn-primary');
+  btn.textContent = 'Menyimpan...';
+  btn.disabled = true;
+
+  const saved = await saveToSheets();
 
   const el = document.getElementById('invoice-preview');
   const opt = {
@@ -925,6 +932,10 @@ function downloadPDF() {
   };
 
   html2pdf().set(opt).from(el).save();
+
+  btn.textContent = saved ? '✓ Tersimpan — Download PDF' : '↓ Download PDF';
+  btn.disabled = false;
+  setTimeout(() => { btn.textContent = '↓ Download PDF'; }, 3000);
 }
 
 function sendWA() {
@@ -945,6 +956,37 @@ function sendWA() {
 
   const url = `https://wa.me/${wa}?text=${encodeURIComponent(msg)}`;
   window.open(url, '_blank');
+}
+
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxMMUACAf51NE-woqrnna1ByeFs6zSrsJYlcqWft9d8chVaIhDsdAmgX3V6vvsaMeh90Q/exec';
+
+async function saveToSheets() {
+  const v = getValues();
+  const tplLabel = {dp:'DP 50%', pel:'Pelunasan', set:'Settled'}[currentTemplate];
+  
+  const payload = {
+    invoiceNo: v.invNo,
+    tanggal: v.invDate,
+    clientName: v.clientName,
+    clientWA: v.clientWA,
+    projTitle: v.projTitle,
+    total: v.total,
+    dp: v.dp,
+    sisa: v.sisa,
+    template: tplLabel
+  };
+
+  try {
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+    const json = await res.json();
+    return json.status === 'ok';
+  } catch(err) {
+    console.error('Sheets error:', err);
+    return false;
+  }
 }
 
 function resetForm() {

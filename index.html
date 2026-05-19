@@ -168,10 +168,7 @@ body {
 .tpl-desc {
   font-size: 11px;
   color: var(--text-muted);
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 12px 14px;
+  padding: 8px 4px;
   line-height: 1.7;
   margin-bottom: 4px;
 }
@@ -507,8 +504,8 @@ body {
 
   <div class="template-tabs">
     <div class="tpl-btn active" onclick="setTemplate('dp', this)">DP 50%</div>
-    <div class="tpl-btn" onclick="setTemplate('pel', this)">Pelunasan</div>
-    <div class="tpl-btn" onclick="setTemplate('set', this)">Settled</div>
+    <div class="tpl-btn" onclick="setTemplate('pel', this)">PELUNASAN</div>
+    <div class="tpl-btn" onclick="setTemplate('set', this)">SETTLED</div>
   </div>
 
   <div class="tpl-desc" id="tpl-desc">
@@ -517,35 +514,27 @@ body {
 
   <div class="section-label">Nomor Invoice</div>
 
-  <div class="field-row">
-    <div class="field">
-      <label>Bulan (MM)</label>
-      <input type="text" id="inv-mm" maxlength="2" placeholder="05" oninput="updateInvoiceNo()">
-    </div>
-    <div class="field">
-      <label>Tahun (YY)</label>
-      <input type="text" id="inv-yy" maxlength="2" placeholder="25" oninput="updateInvoiceNo()">
-    </div>
-  </div>
-  <div class="field">
-    <label>Urutan</label>
-    <input type="text" id="inv-seq" maxlength="3" placeholder="001" oninput="updateInvoiceNo()">
-  </div>
-  <div class="inv-no-preview" id="inv-no-display">CQ-0526-001</div>
+<div class="inv-no-preview" id="inv-no-display">Memuat...</div>
+
+<div class="field">
+  <label>Ubah Urutan (3 angka terakhir)</label>
+  <input type="text" id="inv-seq" maxlength="3" placeholder="001" oninput="overrideSeq()">
+</div>
 
   <div class="section-label">Data Client</div>
 
   <div class="field">
     <label>Nama Client</label>
-    <input type="text" id="client-name" placeholder="PT. Maju Bersama">
-  </div>
+    <input type="text" id="client-name" placeholder="PT. ADARO MINERALS INDONESIA"
+    oninput="this.value = this.value.toUpperCase()">
+</div>
+  
   <div class="field">
-    <label>Nomor WhatsApp</label>
-    <input type="text" id="client-wa" placeholder="+6281234567890">
-  </div>
+    <label>Kontak</label>
+    <input type="tel" id="client-wa" placeholder="628/08" oninput="formatWA(this)">
+</div>
 
   <div class="section-label">Tanggal Invoice</div>
-
   <div class="field">
     <label>Tanggal</label>
     <input type="date" id="inv-date">
@@ -555,18 +544,18 @@ body {
 
   <div class="field">
     <label>Judul (bold)</label>
-    <input type="text" id="proj-title" placeholder="Wedding Videography – Ahmad & Siti">
+    <input type="text" id="proj-title" placeholder="Company Profile">
   </div>
   <div class="field">
     <label>Detail</label>
-    <textarea id="proj-detail" placeholder="Full day coverage, 2 kamera, aerial drone, highlights film 5-7 menit, same day edit teaser"></textarea>
+    <textarea id="proj-detail" placeholder="Full day coverage, 2 kamera, aerial drone, highlights film 5-7 menit"></textarea>
   </div>
 
   <div class="section-label">Harga</div>
 
   <div class="field">
     <label>Total Project (Rp)</label>
-    <input type="number" id="total-price" placeholder="5000000" oninput="updateCalc()">
+    <input type="number" id="total-price" placeholder="57000000" oninput="updateCalc()">
   </div>
 
   <div class="computed-box" id="computed-box"></div>
@@ -575,7 +564,13 @@ body {
 
   <div class="btn-group">
     <button class="btn btn-primary" id="btn-pdf" onclick="downloadPDF()">↓ Download PDF</button>
-    <button class="btn btn-wa" onclick="sendWA()">✉ Kirim ke WhatsApp</button>
+    <button class="btn btn-wa" onclick="sendWA()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+    <path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.117 1.528 5.845L.057 23.571a.75.75 0 0 0 .921.921l5.726-1.471A11.943 11.943 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.694 9.694 0 0 1-4.944-1.352l-.355-.21-3.664.941.957-3.553-.23-.368A9.699 9.699 0 0 1 2.25 12C2.25 6.615 6.615 2.25 12 2.25S21.75 6.615 21.75 12 17.385 21.75 12 21.75z"/>
+  </svg>
+  Kirim ke WhatsApp
+</button>
     <button class="btn btn-secondary" onclick="resetForm()">↺ Reset Form</button>
   </div>
 
@@ -590,11 +585,14 @@ body {
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxMMUACAf51NE-woqrnna1ByeFs6zSrsJYlcqWft9d8chVaIhDsdAmgX3V6vvsaMeh90Q/exec';
 
 let currentTemplate = 'dp';
+let autoSeq = '001';
+let autoMM = '';
+let autoYY = '';
 
 const tplDescs = {
-  dp:  'Invoice tagihan uang muka 50%. Dikirim sebelum project dimulai.',
-  pel: 'Invoice pelunasan 50% sisa tagihan. Dikirim setelah video selesai diambil.',
-  set: 'Invoice konfirmasi lunas. Semua pembayaran sudah diterima.'
+  dp:  'Invoice tagihan uang muka 50% dikirim sebelum project dimulai',
+  pel: 'Invoice pelunasan 50% sisa tagihan dikirim sebelum menyerahkan final output',
+  set: 'Invoice konfirmasi lunas dikirim setelah semua pembayaran diterima'
 };
 
 function setTemplate(tpl, el) {
@@ -610,11 +608,61 @@ function fmt(n) {
   return 'Rp ' + Math.round(n).toLocaleString('id-ID');
 }
 
+function formatWA(input) {
+  let val = input.value.replace(/\D/g, '');
+  if (val.startsWith('08')) val = '62' + val.slice(1);
+  else if (val.startsWith('8')) val = '62' + val;
+  input.value = val;
+}
+
+async function fetchLastSeq() {
+  const display = document.getElementById('inv-no-display');
+  display.textContent = 'Memuat...';
+  try {
+    const res  = await fetch(APPS_SCRIPT_URL + '?action=lastseq');
+    const json = await res.json();
+
+    const today = new Date();
+    autoMM = String(today.getMonth() + 1).padStart(2, '0');
+    autoYY = String(today.getFullYear()).slice(-2);
+
+    if (json.status === 'ok' && json.lastNo) {
+      // Parse nomor terakhir: CQ-MMYY-001
+      const parts = json.lastNo.split('-');
+      const lastSeq = parseInt(parts[2]) || 0;
+      autoSeq = String(lastSeq + 1).padStart(3, '0');
+    } else {
+      autoSeq = '001';
+    }
+
+    document.getElementById('inv-seq').value = '';
+    updateInvoiceNo();
+  } catch(err) {
+    console.error('fetchLastSeq error:', err);
+    const today = new Date();
+    autoMM = String(today.getMonth() + 1).padStart(2, '0');
+    autoYY = String(today.getFullYear()).slice(-2);
+    autoSeq = '001';
+    updateInvoiceNo();
+  }
+}
+
+function overrideSeq() {
+  updateInvoiceNo();
+}
+
+function updateInvoiceNo() {
+  const override = document.getElementById('inv-seq').value;
+  const seq = override ? override.padStart(3, '0') : autoSeq;
+  document.getElementById('inv-no-display').textContent = `CQ-${autoMM}${autoYY}-${seq}`;
+}
+
+function getCurrentInvNo() {
+  return document.getElementById('inv-no-display').textContent;
+}
+
 function getValues() {
-  const mm  = document.getElementById('inv-mm').value  || '05';
-  const yy  = document.getElementById('inv-yy').value  || '26';
-  const seq = document.getElementById('inv-seq').value || '001';
-  const invNo = `CQ-${mm}${yy}-${seq.padStart(3,'0')}`;
+  const invNo = getCurrentInvNo();
 
   const rawDate = document.getElementById('inv-date').value;
   let invDate = '';
@@ -636,13 +684,6 @@ function getValues() {
     projDetail: document.getElementById('proj-detail').value,
     total, dp, sisa
   };
-}
-
-function updateInvoiceNo() {
-  const mm  = document.getElementById('inv-mm').value  || '??';
-  const yy  = document.getElementById('inv-yy').value  || '??';
-  const seq = (document.getElementById('inv-seq').value || '001').padStart(3,'0');
-  document.getElementById('inv-no-display').textContent = `CQ-${mm}${yy}-${seq}`;
 }
 
 function updateCalc() {
@@ -676,9 +717,9 @@ function buildInvoiceHTML() {
   const tpl = currentTemplate;
 
   let statusBadge = '', statusText = '';
-  if (tpl === 'dp')  { statusBadge = 'badge-pending'; statusText = 'Pending'; }
+  if (tpl === 'dp')       { statusBadge = 'badge-pending'; statusText = 'Pending'; }
   else if (tpl === 'pel') { statusBadge = 'badge-balance'; statusText = 'Pending Balance'; }
-  else               { statusBadge = 'badge-settled'; statusText = 'Settled'; }
+  else                    { statusBadge = 'badge-settled'; statusText = 'Settled'; }
 
   let totalsHtml = '';
   if (tpl === 'dp') {
@@ -704,40 +745,16 @@ function buildInvoiceHTML() {
     <div class="inv-payment">
       <div class="inv-section-title">Payment Instruction:</div>
       <div class="inv-bank-name">Bank Transfer</div>
-      <div class="inv-bank-no">SMBCI: 90014746343<br>JULI ISKANDAR ZAKAT</div>
+      <div class="inv-bank-no">SMBC Indonesia: 90014746343<br>JULI ISKANDAR ZAKAT</div>
     </div>` : '<div style="flex:1"></div>';
 
   let termsItems = [];
   if (tpl === 'dp') {
-    termsItems = [
-      'Silahkan melakukan pembayaran uang muka sebesar 50% dari seluruh perkiraan biaya selambat-lambatnya 13 (tiga belas) hari sebelum project dimulai',
-      'Uang muka tidak dapat ditarik kembali dengan alasan apapun',
-      'Sisa pembayaran diharapkan dapat dilunasi 3 (tiga) hari setelah pengambilan video di lapangan selesai',
-      'FREE 1x revisi musik & video',
-      'Final output diserahkan via Google Drive',
-      'Musik berlisensi (free copyright)',
-      'Deadline per project max. 30 (tiga puluh) hari diluar revisi',
-      'Harga yang tertera berlaku untuk 7 (tujuh) jam kerja dalam 1 (satu) hari',
-      'Tagihan ini dianggap sah sebagai kwitansi pembayaran',
-      'Konfirmasi pembayaran dengan mengirimkan struk atau bukti transfer lainnya'
-    ];
+    termsItems = ['Silahkan melakukan pembayaran uang muka sebesar 50% dari seluruh perkiraan biaya selambat-lambatnya 13 (tiga belas) hari sebelum project dimulai','Uang muka tidak dapat ditarik kembali dengan alasan apapun','Sisa pembayaran diharapkan dapat dilunasi 3 (tiga) hari setelah pengambilan video di lapangan selesai','FREE 1x revisi musik & video','Final output diserahkan via Google Drive','Musik berlisensi (free copyright)','Deadline per project max. 30 (tiga puluh) hari diluar revisi','Harga yang tertera berlaku untuk 7 (tujuh) jam kerja dalam 1 (satu) hari','Tagihan ini dianggap sah sebagai kwitansi pembayaran','Konfirmasi pembayaran dengan mengirimkan struk atau bukti transfer lainnya'];
   } else if (tpl === 'pel') {
-    termsItems = [
-      'Silahkan melakukan pelunasan sisa tagihan sebesar 50% dari seluruh perkiraan biaya selambat-lambatnya 3 (tiga) hari setelah invoice ini diterbitkan',
-      'FREE 1x revisi musik & video',
-      'Final output diserahkan via Google Drive',
-      'Musik berlisensi (free copyright)',
-      'Deadline per project max. 30 (tiga puluh) hari diluar revisi',
-      'Tagihan ini dianggap sah sebagai kwitansi pembayaran',
-      'Konfirmasi pembayaran dengan mengirimkan struk atau bukti transfer lainnya'
-    ];
+    termsItems = ['Silahkan melakukan pelunasan sisa tagihan sebesar 50% dari seluruh perkiraan biaya selambat-lambatnya 3 (tiga) hari setelah invoice ini diterbitkan','FREE 1x revisi musik & video','Final output diserahkan via Google Drive','Musik berlisensi (free copyright)','Deadline per project max. 30 (tiga puluh) hari diluar revisi','Tagihan ini dianggap sah sebagai kwitansi pembayaran','Konfirmasi pembayaran dengan mengirimkan struk atau bukti transfer lainnya'];
   } else {
-    termsItems = [
-      'Terima kasih karena telah memenuhi pelunasan atas sisa tagihan pada transaksi ini',
-      'Pembayaran sudah diterima oleh PIHAK VENDOR dan tagihan ini dianggap sah sebagai kwitansi pembayaran',
-      'Adapun syarat dan ketentuan yang telah disepakati akan tetap berlaku hingga project dinyatakan selesai',
-      'Semoga kerjasama ini dapat terjalin dalam jangka waktu yang panjang'
-    ];
+    termsItems = ['Terima kasih karena telah memenuhi pelunasan atas sisa tagihan pada transaksi ini','Pembayaran sudah diterima oleh PIHAK VENDOR dan tagihan ini dianggap sah sebagai kwitansi pembayaran','Adapun syarat dan ketentuan yang telah disepakati akan tetap berlaku hingga project dinyatakan selesai','Semoga kerjasama ini dapat terjalin dalam jangka waktu yang panjang'];
   }
 
   let noteText = '';
@@ -751,15 +768,9 @@ function buildInvoiceHTML() {
       <div class="inv-company">
         <div class="inv-company-label">Invoice</div>
         <div class="inv-company-name">CLARQUEY Video &amp; Film Production</div>
-        <div class="inv-company-address">
-          Jl. Handil Tiga, Komp. Nur Aisya Lestari II, RT. 2, RW. 1, No. 3<br>
-          Kel. Manarap Baru, Kec. Kertak Hanyar, Kabupaten Banjar<br>
-          Kalimantan Selatan 70654<br>
-          +6282252445233 &nbsp;|&nbsp; clarquey.info@gmail.com
-        </div>
+        <div class="inv-company-address">Jl. Handil Tiga, Komp. Nur Aisya Lestari II, RT. 2, RW. 1, No. 3<br>Kel. Manarap Baru, Kec. Kertak Hanyar, Kabupaten Banjar<br>Kalimantan Selatan 70654<br>+6282252445233 &nbsp;|&nbsp; clarquey.info@gmail.com</div>
       </div>
     </div>
-
     <div class="inv-billto-bar">
       <div class="inv-billto-left">
         <div class="inv-billto-label">Bill To</div>
@@ -767,49 +778,20 @@ function buildInvoiceHTML() {
         <div class="inv-client-wa">${v.clientWA || '–'}</div>
       </div>
       <div class="inv-meta-right">
-        <div class="inv-meta-row">
-          <span class="inv-meta-label">Invoice #</span>
-          <span class="inv-meta-value">${v.invNo}</span>
-        </div>
-        <div class="inv-meta-row">
-          <span class="inv-meta-label">Date</span>
-          <span class="inv-meta-value">${v.invDate || '–'}</span>
-        </div>
-        <div class="inv-meta-row">
-          <span class="inv-meta-label">Status</span>
-          <span class="inv-meta-value ${statusBadge}">${statusText}</span>
-        </div>
+        <div class="inv-meta-row"><span class="inv-meta-label">Invoice #</span><span class="inv-meta-value">${v.invNo}</span></div>
+        <div class="inv-meta-row"><span class="inv-meta-label">Date</span><span class="inv-meta-value">${v.invDate || '–'}</span></div>
+        <div class="inv-meta-row"><span class="inv-meta-label">Status</span><span class="inv-meta-value ${statusBadge}">${statusText}</span></div>
       </div>
     </div>
-
     <table class="inv-table">
-      <thead>
-        <tr>
-          <th style="width:50%">Item</th>
-          <th class="right" style="width:12%">Qty</th>
-          <th class="right" style="width:19%">Price</th>
-          <th class="right" style="width:19%">Amount</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>
-            <div class="item-title">${v.projTitle || '–'}</div>
-            <div class="item-detail">${v.projDetail || ''}</div>
-          </td>
-          <td class="right">1</td>
-          <td class="right">${fmt(v.total)}</td>
-          <td class="right">${fmt(v.total)}</td>
-        </tr>
-      </tbody>
+      <thead><tr><th style="width:50%">Item</th><th class="right" style="width:12%">Qty</th><th class="right" style="width:19%">Price</th><th class="right" style="width:19%">Amount</th></tr></thead>
+      <tbody><tr>
+        <td><div class="item-title">${v.projTitle || '–'}</div><div class="item-detail">${v.projDetail || ''}</div></td>
+        <td class="right">1</td><td class="right">${fmt(v.total)}</td><td class="right">${fmt(v.total)}</td>
+      </tr></tbody>
     </table>
-
-    <div class="inv-totals">
-      <div class="inv-totals-table">${totalsHtml}</div>
-    </div>
-
-    <div class="inv-bottom">
-      ${paymentHtml}
+    <div class="inv-totals"><div class="inv-totals-table">${totalsHtml}</div></div>
+    <div class="inv-bottom">${paymentHtml}
       <div class="inv-signature">
         <div class="inv-sign-greeting">Salam Hangat,</div>
         <div class="inv-sign-company">CLARQUEY Multimedia</div>
@@ -819,32 +801,21 @@ function buildInvoiceHTML() {
         <div class="inv-sign-title">Creative Director</div>
       </div>
     </div>
-
-    <div class="inv-terms">
-      <div class="inv-section-title">Term &amp; Condition</div>
+    <div class="inv-terms"><div class="inv-section-title">Term &amp; Condition</div>
       <ul class="inv-terms-list">${termsItems.map(t => `<li>${t}</li>`).join('')}</ul>
     </div>
-
-    <div class="inv-note">
-      <div class="inv-note-title">Note</div>
+    <div class="inv-note"><div class="inv-note-title">Note</div>
       <div class="inv-note-text">${noteText}</div>
-    </div>
-  `;
+    </div>`;
 }
 
 async function saveToSheets() {
   const v = getValues();
   const tplLabel = { dp:'DP 50%', pel:'Pelunasan', set:'Settled' }[currentTemplate];
   const payload = {
-    invoiceNo:  v.invNo,
-    tanggal:    v.invDate,
-    clientName: v.clientName,
-    clientWA:   v.clientWA,
-    projTitle:  v.projTitle,
-    total:      v.total,
-    dp:         v.dp,
-    sisa:       v.sisa,
-    template:   tplLabel
+    invoiceNo: v.invNo, tanggal: v.invDate, clientName: v.clientName,
+    clientWA: v.clientWA, projTitle: v.projTitle, total: v.total,
+    dp: v.dp, sisa: v.sisa, template: tplLabel
   };
   try {
     const res  = await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
@@ -858,28 +829,18 @@ async function saveToSheets() {
 
 function downloadPDF() {
   const v = getValues();
-
-  // Simpan data ke sessionStorage
-  sessionStorage.setItem('cq_invoice', JSON.stringify({
-    template: currentTemplate,
-    ...v
-  }));
-
-  // Simpan ke Sheets di background
+  sessionStorage.setItem('cq_invoice', JSON.stringify({ template: currentTemplate, ...v }));
   saveToSheets();
-
-  // Buka halaman invoice di tab baru
   window.open('invoice.html', '_blank');
 }
 
 function sendWA() {
   const v  = getValues();
-  const wa = v.clientWA.replace(/[^0-9]/g, '');
+  const wa = v.clientWA.replace(/\D/g, '');
   if (!wa) { alert('Isi nomor WhatsApp client dulu!'); return; }
 
   const tpl = currentTemplate;
   let msg = '';
-
   if (tpl === 'dp') {
     msg = `Halo ${v.clientName || 'Kak'},\n\nTerima kasih atas kepercayaan Anda kepada CLARQUEY Video & Film Production 🎬\n\nBerikut kami kirimkan Invoice ${v.invNo} sebagai tagihan Uang Muka (DP) 50% untuk project:\n\n📌 *${v.projTitle || 'Project Anda'}*\n💰 Total Project: ${fmt(v.total)}\n💳 DP 50%: ${fmt(v.dp)}\n\nMohon melakukan pembayaran ke:\n🏦 SMBCI: 90014746343\n👤 JULI ISKANDAR ZAKAT\n\nSilakan kirimkan bukti transfer setelah pembayaran. Terima kasih 🙏\n\n— CLARQUEY Multimedia`;
   } else if (tpl === 'pel') {
@@ -894,23 +855,18 @@ function sendWA() {
 function resetForm() {
   if (!confirm('Reset semua isian?')) return;
   document.querySelectorAll('input, textarea').forEach(el => el.value = '');
-  document.getElementById('inv-no-display').textContent = 'CQ-????-001';
   document.getElementById('computed-box').innerHTML = '';
   setTemplate('dp', document.querySelector('.tpl-btn'));
+  fetchLastSeq();
 }
 
-// Init
 (function() {
   const today = new Date();
-  const mm = String(today.getMonth() + 1).padStart(2, '0');
-  const yy = String(today.getFullYear()).slice(-2);
-  document.getElementById('inv-mm').value   = mm;
-  document.getElementById('inv-yy').value   = yy;
-  document.getElementById('inv-seq').value  = '001';
   document.getElementById('inv-date').value = today.toISOString().split('T')[0];
-  updateInvoiceNo();
   updateCalc();
+  fetchLastSeq();
 })();
 </script>
+  
 </body>
 </html>

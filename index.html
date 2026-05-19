@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Clarquey — Invoice Generator</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -21,10 +21,8 @@
   --text-dim: #999;
   --danger: #ff4545;
   --success: #49adf4;
-  --wa:       #18ba55;
-  --radius:   19px;
-  --mono:     'DM Sans', sans-serif;
-  --sans:     'DM Sans', sans-serif;
+  --radius:   14px;
+  font-family: 'DM Sans', sans-serif;
 }
 
 body {
@@ -63,7 +61,7 @@ body {
   font-size: 11px;
   color: var(--text-muted);
   letter-spacing: 0.1em;
-  font-family: 'DM Mono', monospace;
+  font-family: 'DM Sans', sans-serif;
 }
 
 /* ── LAYOUT ── */
@@ -83,14 +81,12 @@ body {
 
 .section-label {
   font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.25em;
+  font-weight: 400;
+  letter-spacing: 0.3em;
   text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 14px;
+  color: #666;
+  margin-bottom: 12px;
   margin-top: 28px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--border);
 }
 
 .section-label:first-child { margin-top: 0; }
@@ -114,14 +110,14 @@ body {
 .field select {
   width: 100%;
   background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 6px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-input);
   color: var(--text);
   font-family: 'DM Mono', monospace;
-  font-size: 12px;
-  padding: 10px 12px;
+  font-size: 13px;
+  padding: 14px 16px;
   outline: none;
-  transition: border-color 0.15s;
+  transition: border-color 0.2s, background 0.2s;
   appearance: none;
 }
 
@@ -129,12 +125,12 @@ body {
 .field textarea:focus,
 .field select:focus {
   border-color: var(--accent);
+  background: #2f2f2f;
 }
 
-.field textarea {
-  resize: vertical;
-  min-height: 72px;
-  line-height: 1.6;
+.field input::placeholder,
+.field textarea::placeholder {
+  color: var(--text-muted);
 }
 
 .field-row {
@@ -178,7 +174,7 @@ body {
   padding: 10px 12px;
   line-height: 1.7;
   margin-bottom: 20px;
-  font-family: 'DM Mono', monospace;
+  font-family: 'DM Sans', sans-serif;
 }
 
 /* Computed values */
@@ -202,7 +198,7 @@ body {
 .computed-row:last-child { border-bottom: none; }
 
 .computed-label { color: var(--text-dim); font-family: 'DM Mono', monospace; }
-.computed-value { font-weight: 700; color: var(--text); font-family: 'DM Mono', monospace; }
+.computed-value { font-weight: 700; color: var(--text); font-family: 'DM Sans', sans-serif; }
 .computed-row.accent .computed-value { color: var(--accent); }
 .computed-row.green .computed-value { color: var(--success); }
 .computed-row.paid .computed-label { color: var(--success); }
@@ -222,7 +218,7 @@ body {
   gap: 8px;
   padding: 13px 20px;
   border-radius: 6px;
-  font-family: 'Syne', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.12em;
@@ -253,7 +249,7 @@ body {
 
 /* invoice no preview */
 .inv-no-preview {
-  font-family: 'DM Mono', monospace;
+  font-family: 'DM Sans', sans-serif;
   font-size: 13px;
   color: var(--accent);
   font-weight: 700;
@@ -290,7 +286,7 @@ body {
   background: #fff;
   padding: 40px 44px;
   box-shadow: 0 24px 80px rgba(0,0,0,0.7);
-  font-family: 'Syne', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   color: #111;
   flex-shrink: 0;
 }

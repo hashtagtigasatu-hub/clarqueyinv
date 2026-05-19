@@ -856,71 +856,20 @@ async function saveToSheets() {
   }
 }
 
-async function downloadPDF() {
-  const v   = getValues();
-  const btn = document.getElementById('btn-pdf');
-  const ori = btn.textContent;
+function downloadPDF() {
+  const v = getValues();
 
-  const snapshot = {
-    mm:     document.getElementById('inv-mm').value,
-    yy:     document.getElementById('inv-yy').value,
-    seq:    document.getElementById('inv-seq').value,
-    date:   document.getElementById('inv-date').value,
-    name:   document.getElementById('client-name').value,
-    wa:     document.getElementById('client-wa').value,
-    title:  document.getElementById('proj-title').value,
-    detail: document.getElementById('proj-detail').value,
-    total:  document.getElementById('total-price').value
-  };
+  // Simpan data ke sessionStorage
+  sessionStorage.setItem('cq_invoice', JSON.stringify({
+    template: currentTemplate,
+    ...v
+  }));
 
-  btn.textContent = 'Menyimpan ke Sheets...';
-  btn.disabled = true;
+  // Simpan ke Sheets di background
+  saveToSheets();
 
-  const saved = await saveToSheets();
-  btn.textContent = 'Membuat PDF...';
-
-  document.getElementById('invoice-content').innerHTML = buildInvoiceHTML();
-
-  const el = document.getElementById('invoice-content');
-  const contentHeight = el.offsetHeight;
-  const filename = `Invoice_${v.invNo}_${(v.clientName || 'Client').replace(/\s+/g,'_')}.pdf`;
-
-  const opt = {
-    margin: 0,
-    filename: filename,
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: {
-      scale: 2,
-      useCORS: true,
-      letterRendering: true,
-      width: 620,
-      windowWidth: 620
-    },
-    jsPDF: {
-      unit: 'px',
-      format: [620, contentHeight + 60],
-      orientation: 'portrait'
-    }
-  };
-
-  await html2pdf().set(opt).from(el).save();
-
-  // Restore form
-  document.getElementById('inv-mm').value      = snapshot.mm;
-  document.getElementById('inv-yy').value      = snapshot.yy;
-  document.getElementById('inv-seq').value     = snapshot.seq;
-  document.getElementById('inv-date').value    = snapshot.date;
-  document.getElementById('client-name').value = snapshot.name;
-  document.getElementById('client-wa').value   = snapshot.wa;
-  document.getElementById('proj-title').value  = snapshot.title;
-  document.getElementById('proj-detail').value = snapshot.detail;
-  document.getElementById('total-price').value = snapshot.total;
-  updateInvoiceNo();
-  updateCalc();
-
-  btn.textContent = saved ? '✓ Tersimpan di Sheets!' : '⚠ PDF ok, Sheets gagal';
-  btn.disabled = false;
-  setTimeout(() => { btn.textContent = ori; }, 3000);
+  // Buka halaman invoice di tab baru
+  window.open('invoice.html', '_blank');
 }
 
 function sendWA() {

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clarquey Invoice</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: #fff; color: #111; }
+
+.print-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #f0ff00;
+  color: #000;
+  border: none;
+  padding: 14px 24px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-radius: 12px;
+  cursor: pointer;
+  z-index: 999;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+@media print {
+  .print-btn { display: none; }
+  body { margin: 0; }
+}
+
+.inv-wrap {
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 40px 44px;
+}
+
+/* semua class invoice sama persis dengan index.html */
+.inv-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; }
+.inv-logo { width: 110px; height: 80px; background: #1a1a1a; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.inv-logo-text { color: #fff; font-size: 13px; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase; }
+.inv-company { text-align: right; }
+.inv-company-label { font-size: 9px; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase; color: #999; margin-bottom: 6px; }
+.inv-company-name { font-size: 14px; font-weight: 700; color: #111; margin-bottom: 8px; }
+.inv-company-address { font-size: 8.5px; color: #666; line-height: 1.8; }
+.inv-billto-bar { background: #f5f5f5; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.inv-billto-label { font-size: 8px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: #999; margin-bottom: 6px; }
+.inv-client-name { font-size: 13px; font-weight: 700; color: #111; margin-bottom: 2px; }
+.inv-client-wa { font-size: 10px; color: #555; }
+.inv-meta-right { text-align: right; }
+.inv-meta-row { display: flex; justify-content: flex-end; align-items: center; gap: 20px; margin-bottom: 4px; }
+.inv-meta-label { font-size: 9px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #999; }
+.inv-meta-value { font-size: 11px; font-weight: 700; color: #111; min-width: 100px; text-align: right; }
+.badge-pending { color: #b45309; }
+.badge-balance { color: #1d4ed8; }
+.badge-settled { color: #166534; }
+.inv-table { width: 100%; border-collapse: collapse; }
+.inv-table thead tr { border-bottom: 2px solid #111; }
+.inv-table thead th { font-size: 8px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: #111; padding: 8px 8px 10px; text-align: left; }
+.inv-table thead th.right { text-align: right; }
+.inv-table tbody tr { border-bottom: 1px solid #e8e8e8; }
+.inv-table tbody td { padding: 16px 8px; font-size: 10px; color: #333; vertical-align: top; line-height: 1.6; }
+.inv-table tbody td.right { text-align: right; white-space: nowrap; }
+.item-title { font-weight: 700; font-size: 11px; color: #111; margin-bottom: 4px; line-height: 1.5; }
+.item-detail { font-size: 9.5px; color: #555; line-height: 1.7; }
+.inv-totals { display: flex; justify-content: flex-end; }
+.inv-totals-table { width: 280px; }
+.total-row { display: flex; justify-content: space-between; padding: 7px 8px; border-bottom: 1px solid #f0f0f0; }
+.total-row.amount-due { background: #111; border-bottom: none; margin-top: 4px; padding: 10px 12px; }
+.total-label { font-size: 10px; color: #666; font-weight: 500; }
+.total-value { font-size: 10px; font-weight: 600; color: #111; }
+.total-row.amount-due .total-label, .total-row.amount-due .total-value { color: #fff; font-size: 11px; font-weight: 700; }
+.paid-text { color: #16a34a; }
+.paid-label { color: #16a34a !important; }
+.inv-bottom { display: flex; justify-content: space-between; align-items: flex-start; margin-top: 28px; }
+.inv-section-title { font-size: 9px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #111; margin-bottom: 8px; }
+.inv-bank-name { font-size: 10.5px; font-weight: 700; color: #111; margin-bottom: 2px; }
+.inv-bank-no { font-size: 10px; color: #333; line-height: 1.7; }
+.inv-signature { text-align: center; min-width: 180px; }
+.inv-sign-greeting { font-size: 9px; color: #555; margin-bottom: 2px; }
+.inv-sign-company { font-size: 9px; font-weight: 700; color: #111; margin-bottom: 28px; }
+.inv-sign-logo { width: 90px; height: 34px; background: #1a1a1a; margin: 0 auto 4px; display: flex; align-items: center; justify-content: center; }
+.inv-sign-logo-text { color: #fff; font-size: 7px; font-weight: 700; letter-spacing: 0.2em; }
+.inv-sign-name { font-size: 9px; font-weight: 700; color: #111; text-decoration: underline; margin-top: 4px; }
+.inv-sign-title { font-size: 8px; color: #888; margin-top: 2px; }
+.inv-terms { margin-top: 24px; }
+.inv-terms-list { list-style: none; padding: 0; }
+.inv-terms-list li { font-size: 8px; color: #555; line-height: 1.8; padding-left: 12px; position: relative; }
+.inv-terms-list li::before { content: "•"; position: absolute; left: 0; color: #999; }
+.inv-note { margin-top: 20px; padding-top: 14px; border-top: 1px solid #e8e8e8; }
+.inv-note-title { font-size: 8px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #111; margin-bottom: 6px; }
+.inv-note-text { font-size: 8px; color: #666; line-height: 1.8; }
+</style>
+</head>
+<body>
+
+<button class="print-btn" onclick="window.print()">⬇ Simpan PDF</button>
+
+<div class="inv-wrap" id="inv-wrap"></div>
+
+<script>
+function fmt(n) {
+  if (!n || isNaN(n)) return 'Rp 0';
+  return 'Rp ' + Math.round(n).toLocaleString('id-ID');
+}
+
+const raw = sessionStorage.getItem('cq_invoice');
+if (!raw) { document.getElementById('inv-wrap').innerHTML = '<p style="padding:40px;color:#999">Data invoice tidak ditemukan. Silakan kembali ke form.</p>'; }
+else {
+  const d = JSON.parse(raw);
+  const tpl = d.template;
+
+  let statusBadge = '', statusText = '';
+  if (tpl === 'dp')        { statusBadge = 'badge-pending'; statusText = 'Pending'; }
+  else if (tpl === 'pel')  { statusBadge = 'badge-balance'; statusText = 'Pending Balance'; }
+  else                     { statusBadge = 'badge-settled'; statusText = 'Settled'; }
+
+  let totalsHtml = '';
+  if (tpl === 'dp') {
+    totalsHtml = `
+      <div class="total-row"><span class="total-label">Subtotal</span><span class="total-value">${fmt(d.total)}</span></div>
+      <div class="total-row"><span class="total-label">Down Payment 50%</span><span class="total-value">${fmt(d.dp)}</span></div>
+      <div class="total-row amount-due"><span class="total-label">Amount Due</span><span class="total-value">${fmt(d.dp)}</span></div>`;
+  } else if (tpl === 'pel') {
+    totalsHtml = `
+      <div class="total-row"><span class="total-label">Subtotal</span><span class="total-value">${fmt(d.total)}</span></div>
+      <div class="total-row"><span class="total-label paid-label">Down Payment 50% &nbsp;✓ PAID</span><span class="total-value paid-text">${fmt(d.dp)}</span></div>
+      <div class="total-row"><span class="total-label">Remaining Payment</span><span class="total-value">${fmt(d.sisa)}</span></div>
+      <div class="total-row amount-due"><span class="total-label">Amount Due</span><span class="total-value">${fmt(d.sisa)}</span></div>`;
+  } else {
+    totalsHtml = `
+      <div class="total-row"><span class="total-label">Subtotal</span><span class="total-value">${fmt(d.total)}</span></div>
+      <div class="total-row"><span class="total-label paid-label">Down Payment 50% &nbsp;✓ PAID</span><span class="total-value paid-text">${fmt(d.dp)}</span></div>
+      <div class="total-row"><span class="total-label paid-label">Remaining Payment &nbsp;✓ PAID</span><span class="total-value paid-text">${fmt(d.sisa)}</span></div>
+      <div class="total-row amount-due"><span class="total-label">Settled ✓</span><span class="total-value">${fmt(d.total)}</span></div>`;
+  }
+
+  const paymentHtml = tpl !== 'set' ? `
+    <div class="inv-payment">
+      <div class="inv-section-title">Payment Instruction:</div>
+      <div class="inv-bank-name">Bank Transfer</div>
+      <div class="inv-bank-no">SMBCI: 90014746343<br>JULI ISKANDAR ZAKAT</div>
+    </div>` : '<div style="flex:1"></div>';
+
+  let termsItems = [];
+  if (tpl === 'dp') {
+    termsItems = ['Silahkan melakukan pembayaran uang muka sebesar 50% dari seluruh perkiraan biaya selambat-lambatnya 13 (tiga belas) hari sebelum project dimulai','Uang muka tidak dapat ditarik kembali dengan alasan apapun','Sisa pembayaran diharapkan dapat dilunasi 3 (tiga) hari setelah pengambilan video di lapangan selesai','FREE 1x revisi musik & video','Final output diserahkan via Google Drive','Musik berlisensi (free copyright)','Deadline per project max. 30 (tiga puluh) hari diluar revisi','Harga yang tertera berlaku untuk 7 (tujuh) jam kerja dalam 1 (satu) hari','Tagihan ini dianggap sah sebagai kwitansi pembayaran','Konfirmasi pembayaran dengan mengirimkan struk atau bukti transfer lainnya'];
+  } else if (tpl === 'pel') {
+    termsItems = ['Silahkan melakukan pelunasan sisa tagihan sebesar 50% dari seluruh perkiraan biaya selambat-lambatnya 3 (tiga) hari setelah invoice ini diterbitkan','FREE 1x revisi musik & video','Final output diserahkan via Google Drive','Musik berlisensi (free copyright)','Deadline per project max. 30 (tiga puluh) hari diluar revisi','Tagihan ini dianggap sah sebagai kwitansi pembayaran','Konfirmasi pembayaran dengan mengirimkan struk atau bukti transfer lainnya'];
+  } else {
+    termsItems = ['Terima kasih karena telah memenuhi pelunasan atas sisa tagihan pada transaksi ini','Pembayaran sudah diterima oleh PIHAK VENDOR dan tagihan ini dianggap sah sebagai kwitansi pembayaran','Adapun syarat dan ketentuan yang telah disepakati akan tetap berlaku hingga project dinyatakan selesai','Semoga kerjasama ini dapat terjalin dalam jangka waktu yang panjang'];
+  }
+
+  let noteText = '';
+  if (tpl === 'dp') noteText = 'Dengan melakukan pembayaran Uang Muka, maka Client telah menyetujui Syarat dan Ketentuan yang berlaku sebagaimana yang tersebut di atas.';
+  else if (tpl === 'pel') noteText = 'Dengan melakukan pelunasan, maka Client dianggap telah menyetujui Syarat dan Ketentuan yang telah disepakati sebelumnya.';
+  else noteText = 'Tagihan ini merupakan kwitansi resmi atas pelunasan penuh yang telah diterima. Project akan dilanjutkan sesuai timeline yang telah disepakati.';
+
+  document.getElementById('inv-wrap').innerHTML = `
+    <div class="inv-header">
+      <div class="inv-logo"><span class="inv-logo-text">CLARQUEY</span></div>
+      <div class="inv-company">
+        <div class="inv-company-label">Invoice</div>
+        <div class="inv-company-name">CLARQUEY Video &amp; Film Production</div>
+        <div class="inv-company-address">Jl. Handil Tiga, Komp. Nur Aisya Lestari II, RT. 2, RW. 1, No. 3<br>Kel. Manarap Baru, Kec. Kertak Hanyar, Kabupaten Banjar<br>Kalimantan Selatan 70654<br>+6282252445233 &nbsp;|&nbsp; clarquey.info@gmail.com</div>
+      </div>
+    </div>
+    <div class="inv-billto-bar">
+      <div class="inv-billto-left">
+        <div class="inv-billto-label">Bill To</div>
+        <div class="inv-client-name">${d.clientName || '–'}</div>
+        <div class="inv-client-wa">${d.clientWA || '–'}</div>
+      </div>
+      <div class="inv-meta-right">
+        <div class="inv-meta-row"><span class="inv-meta-label">Invoice #</span><span class="inv-meta-value">${d.invNo}</span></div>
+        <div class="inv-meta-row"><span class="inv-meta-label">Date</span><span class="inv-meta-value">${d.invDate || '–'}</span></div>
+        <div class="inv-meta-row"><span class="inv-meta-label">Status</span><span class="inv-meta-value ${statusBadge}">${statusText}</span></div>
+      </div>
+    </div>
+    <table class="inv-table">
+      <thead><tr><th style="width:50%">Item</th><th class="right" style="width:12%">Qty</th><th class="right" style="width:19%">Price</th><th class="right" style="width:19%">Amount</th></tr></thead>
+      <tbody><tr>
+        <td><div class="item-title">${d.projTitle || '–'}</div><div class="item-detail">${d.projDetail || ''}</div></td>
+        <td class="right">1</td>
+        <td class="right">${fmt(d.total)}</td>
+        <td class="right">${fmt(d.total)}</td>
+      </tr></tbody>
+    </table>
+    <div class="inv-totals"><div class="inv-totals-table">${totalsHtml}</div></div>
+    <div class="inv-bottom">
+      ${paymentHtml}
+      <div class="inv-signature">
+        <div class="inv-sign-greeting">Salam Hangat,</div>
+        <div class="inv-sign-company">CLARQUEY Multimedia</div>
+        <div style="font-size:9px;color:#999;font-style:italic;margin-bottom:8px">[ tanda tangan ]</div>
+        <div class="inv-sign-logo"><span class="inv-sign-logo-text">CLARQUEY</span></div>
+        <div class="inv-sign-name">JULI ISKANDAR ZAKAT, S.Kom</div>
+        <div class="inv-sign-title">Creative Director</div>
+      </div>
+    </div>
+    <div class="inv-terms">
+      <div class="inv-section-title">Term &amp; Condition</div>
+      <ul class="inv-terms-list">${termsItems.map(t => `<li>${t}</li>`).join('')}</ul>
+    </div>
+    <div class="inv-note">
+      <div class="inv-note-title">Note</div>
+      <div class="inv-note-text">${noteText}</div>
+    </div>`;
+}
+</script>
+</body>
+</html>

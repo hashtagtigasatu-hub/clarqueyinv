@@ -106,9 +106,22 @@ html {
 .inv-table tbody td.right { text-align: right; white-space: nowrap; }
 .item-title { font-weight: 700; font-size: 11px; color: #111; margin-bottom: 4px; line-height: 1.5; }
 .item-detail { font-size: 9.5px; color: #555; line-height: 1.7; }
+  
 .inv-totals { display: flex; justify-content: flex-end; }
 .inv-totals-table { width: 280px; }
-.total-row { display: flex; justify-content: space-between; padding: 7px 8px; border-bottom: 1px solid #f0f0f0; }
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 7px 8px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.total-label { font-size: 10px; color: #666; font-weight: 500; }
+.total-value { font-size: 10px; font-weight: 600; color: #111; }
+
+.paid-text { color: #16a34a; }
+.paid-label { color: #16a34a !important; }
 
 .total-row.amount-due {
   border-top: 2px solid #111;
@@ -120,7 +133,7 @@ html {
 
 .total-row.amount-due .total-label,
 .total-row.amount-due .total-value {
-  color: #111;
+  color: #111 !important;
   font-size: 11px;
   font-weight: 700;
 }

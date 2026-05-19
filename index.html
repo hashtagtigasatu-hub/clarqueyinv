@@ -544,8 +544,10 @@ body {
 
   <div class="field">
     <label>Judul (bold)</label>
-    <input type="text" id="proj-title" placeholder="Company Profile">
+    <input type="text" id="proj-title" placeholder="Company Profile"
+      oninput="this.value = this.value.replace(/\b\w/g, c => c.toUpperCase())">
   </div>
+  
   <div class="field">
     <label>Detail</label>
     <textarea id="proj-detail" placeholder="Full day coverage, 2 kamera, aerial drone, highlights film 5-7 menit"></textarea>
@@ -828,6 +830,20 @@ async function saveToSheets() {
 
 function downloadPDF() {
   const v = getValues();
+
+  // Validasi field wajib
+  const missing = [];
+  if (!v.clientName)  missing.push('Nama Client');
+  if (!v.clientWA)    missing.push('Nomor WhatsApp');
+  if (!v.invDate)     missing.push('Tanggal Invoice');
+  if (!v.projTitle)   missing.push('Judul Project');
+  if (!v.total)       missing.push('Total Harga');
+
+  if (missing.length > 0) {
+    alert('Data belum lengkap:\n• ' + missing.join('\n• '));
+    return;
+  }
+
   sessionStorage.setItem('cq_invoice', JSON.stringify({ template: currentTemplate, ...v }));
   saveToSheets();
   window.open('invoice.html', '_blank');

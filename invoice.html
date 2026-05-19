@@ -33,9 +33,14 @@ body { font-family: 'DM Sans', sans-serif; background: #fff; color: #111; }
   
   /* Hilangkan header/footer URL bawaan browser */
   @page {
-    margin: 0;
-    size: A4;
-  }
+  margin: 0;
+  size: A4;
+}
+
+html {
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
   
   .inv-wrap {
     padding: 28px 36px;
@@ -67,8 +72,16 @@ body { font-family: 'DM Sans', sans-serif; background: #fff; color: #111; }
 
 /* semua class invoice sama persis dengan index.html */
 .inv-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; }
-.inv-logo { width: 110px; height: 80px; background: #1a1a1a; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.inv-logo-text { color: #fff; font-size: 13px; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase; }
+  
+.inv-logo {
+  width: 110px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+  
 .inv-company { text-align: right; }
 .inv-company-label { font-size: 9px; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase; color: #999; margin-bottom: 6px; }
 .inv-company-name { font-size: 14px; font-weight: 700; color: #111; margin-bottom: 8px; }
@@ -96,7 +109,21 @@ body { font-family: 'DM Sans', sans-serif; background: #fff; color: #111; }
 .inv-totals { display: flex; justify-content: flex-end; }
 .inv-totals-table { width: 280px; }
 .total-row { display: flex; justify-content: space-between; padding: 7px 8px; border-bottom: 1px solid #f0f0f0; }
-.total-row.amount-due { background: #111; border-bottom: none; margin-top: 4px; padding: 10px 12px; }
+
+.total-row.amount-due {
+  border-top: 2px solid #111;
+  border-bottom: 2px solid #111;
+  margin-top: 4px;
+  padding: 10px 8px;
+}
+
+.total-row.amount-due .total-label,
+.total-row.amount-due .total-value {
+  color: #111;
+  font-size: 11px;
+  font-weight: 700;
+}
+  
 .total-label { font-size: 10px; color: #666; font-weight: 500; }
 .total-value { font-size: 10px; font-weight: 600; color: #111; }
 .total-row.amount-due .total-label, .total-row.amount-due .total-value { color: #fff; font-size: 11px; font-weight: 700; }
@@ -109,8 +136,7 @@ body { font-family: 'DM Sans', sans-serif; background: #fff; color: #111; }
 .inv-signature { text-align: center; min-width: 180px; }
 .inv-sign-greeting { font-size: 9px; color: #555; margin-bottom: 2px; }
 .inv-sign-company { font-size: 9px; font-weight: 700; color: #111; margin-bottom: 28px; }
-.inv-sign-logo { width: 90px; height: 34px; background: #1a1a1a; margin: 0 auto 4px; display: flex; align-items: center; justify-content: center; }
-.inv-sign-logo-text { color: #fff; font-size: 7px; font-weight: 700; letter-spacing: 0.2em; }
+
 .inv-sign-name { font-size: 9px; font-weight: 700; color: #111; text-decoration: underline; margin-top: 4px; }
 .inv-sign-title { font-size: 8px; color: #888; margin-top: 2px; }
 .inv-terms { margin-top: 24px; }
@@ -191,7 +217,9 @@ else {
 
   document.getElementById('inv-wrap').innerHTML = `
     <div class="inv-header">
-      <div class="inv-logo"><span class="inv-logo-text">CLARQUEY</span></div>
+      <div class="inv-logo">
+        <img src="clarqueyweb.png" style="width:90px;height:auto;object-fit:contain;" alt="Clarquey">
+      </div>
       <div class="inv-company">
         <div class="inv-company-label">Invoice</div>
         <div class="inv-company-name">CLARQUEY Video &amp; Film Production</div>
@@ -225,7 +253,6 @@ else {
       <div class="inv-signature">
         <div class="inv-sign-greeting">Salam Hangat,</div>
         <div class="inv-sign-company">CLARQUEY</div>
-        <div style="font-size:9px;color:#999;font-style:italic;margin-bottom:8px">[ tanda tangan ]</div>
         <div class="inv-sign-name">JULI ISKANDAR ZAKAT, S.Kom</div>
         <div class="inv-sign-title">Creative Director</div>
       </div>

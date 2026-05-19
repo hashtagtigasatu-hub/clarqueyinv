@@ -28,13 +28,14 @@ body { font-family: 'DM Sans', sans-serif; background: #fff; color: #111; }
   box-shadow: 0 4px 20px rgba(0,0,0,0.2);
 }
 
-@media print {
-  .print-btn { display: none; }
-  
-  /* Hilangkan header/footer URL bawaan browser */
-  @page {
+@page {
   margin: 0;
   size: A4;
+}
+
+@media print {
+  .print-btn { display: none; }
+  ...
 }
 
 html {

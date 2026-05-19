@@ -915,12 +915,14 @@ async function downloadPDF() {
   const v = getValues();
   const filename = `Invoice_${v.invNo}_${(v.clientName || 'Client').replace(/\s+/g,'_')}.pdf`;
 
-  // Simpan ke Sheets dulu
   const btn = document.querySelector('.btn-primary');
-  btn.textContent = 'Menyimpan...';
+  const originalText = btn.textContent;
+  btn.textContent = 'Menyimpan ke Sheets...';
   btn.disabled = true;
 
   const saved = await saveToSheets();
+
+  btn.textContent = 'Membuat PDF...';
 
   const el = document.getElementById('invoice-preview');
   const opt = {
@@ -931,11 +933,11 @@ async function downloadPDF() {
     jsPDF: { unit: 'px', format: [620, el.scrollHeight + 80], orientation: 'portrait' }
   };
 
-  html2pdf().set(opt).from(el).save();
+  await html2pdf().set(opt).from(el).save();
 
-  btn.textContent = saved ? '✓ Tersimpan — Download PDF' : '↓ Download PDF';
+  btn.textContent = saved ? '✓ Tersimpan di Sheets!' : '⚠ PDF ok, Sheets gagal';
   btn.disabled = false;
-  setTimeout(() => { btn.textContent = '↓ Download PDF'; }, 3000);
+  setTimeout(() => { btn.textContent = originalText; }, 3000);
 }
 
 function sendWA() {
@@ -976,6 +978,35 @@ async function saveToSheets() {
     template: tplLabel
   };
 
+  try {
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+    const json = await res.json();
+    return json.status === 'ok';
+  } catch(err) {
+    console.error('Sheets error:', err);
+    return false;
+  }
+}
+
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxMMUACAf51NE-woqrnna1ByeFs6zSrsJYlcqWft9d8chVaIhDsdAmgX3V6vvsaMeh90Q/exec';
+
+async function saveToSheets() {
+  const v = getValues();
+  const tplLabel = {dp:'DP 50%', pel:'Pelunasan', set:'Settled'}[currentTemplate];
+  const payload = {
+    invoiceNo: v.invNo,
+    tanggal: v.invDate,
+    clientName: v.clientName,
+    clientWA: v.clientWA,
+    projTitle: v.projTitle,
+    total: v.total,
+    dp: v.dp,
+    sisa: v.sisa,
+    template: tplLabel
+  };
   try {
     const res = await fetch(APPS_SCRIPT_URL, {
       method: 'POST',

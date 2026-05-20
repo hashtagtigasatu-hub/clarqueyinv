@@ -695,10 +695,12 @@ body {
   <input type="text" id="inv-seq" maxlength="3" placeholder="007" oninput="overrideSeq()">
 </div>
 
-<div class="section-label" id="label-search" style="display:none">Cari Data DP</div>
+<div class="field">
+    <label>Cari Data DP</label>
+ </div>
 
 <div class="search-wrap" id="search-wrap" style="display:none">
-  <input type="text" id="search-input" placeholder="Ketik nama client"
+  <input type="text" id="search-input" placeholder="Adaro/Minerals/Indonesia"
     oninput="onSearchInput(this.value)" autocomplete="off">
   <div class="search-dropdown" id="search-dropdown"></div>
 </div>
@@ -707,16 +709,15 @@ body {
 
   <div class="field">
     <label>Nama Client</label>
-    <input type="text" id="client-name" placeholder="PT. ADARO MINERALS INDONESIA"
+    <input type="text" id="client-name" placeholder="PERSONAL/CORPORATE"
     oninput="this.value = this.value.toUpperCase()">
 </div>
   
   <div class="field">
     <label>Kontak</label>
-    <input type="tel" id="client-wa" placeholder="628 / 08" oninput="formatWA(this)">
+    <input type="tel" id="client-wa" placeholder="08xx/62xx" oninput="formatWA(this)">
 </div>
 
-  <div class="section-label">Tanggal Invoice</div>
   <div class="field">
     <label>Tanggal</label>
     <input type="date" id="inv-date">
@@ -744,7 +745,9 @@ body {
 
   <div class="computed-box" id="computed-box"></div>
 
-  <div class="section-label">Aksi</div>
+  <div class="field">
+    <label>Aksi</label>
+ </div>
 
   <div class="btn-group">
     <button class="btn btn-primary" id="btn-pdf" onclick="downloadPDF()">Download PDF</button>

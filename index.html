@@ -63,9 +63,15 @@ body {
 
 /* ── MAIN ── */
 .main {
-  padding: 24px 20px 80px;
+  padding: 16px 20px 110px;
   max-width: 600px;
   margin: 0 auto;
+}
+
+@supports (padding: max(0px)) {
+  .main {
+    padding-bottom: max(90px, calc(70px + env(safe-area-inset-bottom)));
+  }
 }
 
 /* ── SECTION LABEL ── */
@@ -254,8 +260,13 @@ body {
 }
 .btn-secondary:active { background: var(--surface2); }
 
-.btn-wa { background: #25d366; color: #fff; }
-.btn-wa:active { background: #1fb559; }
+.btn-wa {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+}
+
+.btn-wa:active { background: var(--surface2); }
 
 /* ── HIDDEN INVOICE (untuk PDF) ── */
 #invoice-for-pdf {
@@ -500,6 +511,52 @@ body {
 .inv-note { margin-top: 20px; padding-top: 14px; border-top: 1px solid #e8e8e8; }
 .inv-note-title { font-size: 8px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #111; margin-bottom: 6px; }
 .inv-note-text { font-size: 8px; color: #666; line-height: 1.8; }
+
+  /* ── BOTTOM NAV ── */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  display: flex;
+  z-index: 100;
+  padding-bottom: max(env(safe-area-inset-bottom), 20px);
+}
+
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 0 8px;
+  gap: 4px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: all 0.15s;
+}
+
+.nav-item svg {
+  width: 22px;
+  height: 22px;
+  fill: var(--text-muted);
+  transition: fill 0.15s;
+}
+
+.nav-item span {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  transition: color 0.15s;
+}
+
+.nav-item.active svg { fill: var(--accent); }
+.nav-item.active span { color: var(--accent); }
+  
 </style>
 </head>
 <body>
@@ -510,18 +567,6 @@ body {
 </div>
 
 <div class="main">
-
-  <div class="section-label">Template</div>
-
-  <div class="template-tabs">
-    <div class="tpl-btn active" onclick="setTemplate('dp', this)">DP 50%</div>
-    <div class="tpl-btn" onclick="setTemplate('pel', this)">PELUNASAN</div>
-    <div class="tpl-btn" onclick="setTemplate('set', this)">SETTLED</div>
-  </div>
-
-  <div class="tpl-desc" id="tpl-desc">
-    Invoice tagihan uang muka 50%. Dikirim sebelum project dimulai.
-  </div>
 
   <div class="section-label">Nomor Invoice</div>
 
@@ -554,7 +599,7 @@ body {
   <div class="section-label">Deskripsi Project</div>
 
   <div class="field">
-    <label>Judul (bold)</label>
+    <label>Judul</label>
     <input type="text" id="proj-title" placeholder="Company Profile"
       oninput="this.value = this.value.replace(/\b\w/g, c => c.toUpperCase())">
   </div>
@@ -576,7 +621,7 @@ body {
   <div class="section-label">Aksi</div>
 
   <div class="btn-group">
-    <button class="btn btn-primary" id="btn-pdf" onclick="downloadPDF()">↓ Download PDF</button>
+    <button class="btn btn-primary" id="btn-pdf" onclick="downloadPDF()">Download PDF</button>
     <button class="btn btn-wa" onclick="sendWA()">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
@@ -610,9 +655,9 @@ const tplDescs = {
 
 function setTemplate(tpl, el) {
   currentTemplate = tpl;
-  document.querySelectorAll('.tpl-btn').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('tpl-desc').textContent = tplDescs[tpl];
+  // Update nav active state
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('nav-' + tpl).classList.add('active');
   updateCalc();
 }
 
@@ -708,17 +753,17 @@ function updateCalc() {
     rows = `
       <div class="computed-row"><span class="computed-label">Total Project</span><span class="computed-value">${fmt(total)}</span></div>
       <div class="computed-row accent"><span class="computed-label">Down Payment 50%</span><span class="computed-value">${fmt(dp)}</span></div>
-      <div class="computed-row"><span class="computed-label">Sisa (nanti)</span><span class="computed-value">${fmt(sisa)}</span></div>`;
+      <div class="computed-row"><span class="computed-label">Remaining Payment</span><span class="computed-value">${fmt(sisa)}</span></div>`;
   } else if (tpl === 'pel') {
     rows = `
       <div class="computed-row"><span class="computed-label">Total Project</span><span class="computed-value">${fmt(total)}</span></div>
-      <div class="computed-row paid"><span class="computed-label">DP 50% ✓ PAID</span><span class="computed-value">${fmt(dp)}</span></div>
-      <div class="computed-row accent"><span class="computed-label">Sisa / Amount Due</span><span class="computed-value">${fmt(sisa)}</span></div>`;
+      <div class="computed-row paid"><span class="computed-label">Down Payment 50% ✓ PAID</span><span class="computed-value">${fmt(dp)}</span></div>
+      <div class="computed-row accent"><span class="computed-label">Remaining Payment / Amount Due</span><span class="computed-value">${fmt(sisa)}</span></div>`;
   } else {
     rows = `
       <div class="computed-row"><span class="computed-label">Total Project</span><span class="computed-value">${fmt(total)}</span></div>
       <div class="computed-row paid"><span class="computed-label">DP 50% ✓ PAID</span><span class="computed-value">${fmt(dp)}</span></div>
-      <div class="computed-row paid"><span class="computed-label">Sisa ✓ PAID</span><span class="computed-value">${fmt(sisa)}</span></div>
+      <div class="computed-row paid"><span class="computed-label">Remaining Payment ✓ PAID</span><span class="computed-value">${fmt(sisa)}</span></div>
       <div class="computed-row green"><span class="computed-label">SETTLED ✓</span><span class="computed-value">${fmt(total)}</span></div>`;
   }
 
@@ -763,11 +808,30 @@ function buildInvoiceHTML() {
 
   let termsItems = [];
   if (tpl === 'dp') {
-    termsItems = ['Silahkan melakukan pembayaran uang muka sebesar 50% dari seluruh perkiraan biaya selambat-lambatnya 13 (tiga belas) hari sebelum project dimulai','Uang muka tidak dapat ditarik kembali dengan alasan apapun','Sisa pembayaran diharapkan dapat dilunasi 3 (tiga) hari setelah pengambilan video di lapangan selesai','FREE 1x revisi musik & video','Final output diserahkan via Google Drive','Musik berlisensi (free copyright)','Deadline per project max. 30 (tiga puluh) hari diluar revisi','Harga yang tertera berlaku untuk 7 (tujuh) jam kerja dalam 1 (satu) hari','Tagihan ini dianggap sah sebagai kwitansi pembayaran','Konfirmasi pembayaran dengan mengirimkan struk atau bukti transfer lainnya'];
+    termsItems = ['DP 50% dibayarkan selambat-lambatnya 13 hari sebelum project dimulai',
+                  'Uang muka tidak dapat ditarik kembali dengan alasan apapun',
+                  'Pelunasan dilakukan maksimal 3 hari setelah proses syuting',
+                  'FREE 2x minor revisi musik & video',
+                  'Final output diserahkan via Google Drive',
+                  'Musik berlisensi (free copyright)',
+                  'Deadline per project max. 30 hari diluar revisi',
+                  'Harga yang tertera berlaku untuk 7 jam kerja per hari',
+                  'Tagihan ini dianggap sah sebagai kwitansi pembayaran',
+                  'Konfirmasi pembayaran dengan mengirimkan bukti transfer'];
+    
   } else if (tpl === 'pel') {
-    termsItems = ['Silahkan melakukan pelunasan sisa tagihan sebesar 50% dari seluruh perkiraan biaya selambat-lambatnya 3 (tiga) hari setelah invoice ini diterbitkan','FREE 1x revisi musik & video','Final output diserahkan via Google Drive','Musik berlisensi (free copyright)','Deadline per project max. 30 (tiga puluh) hari diluar revisi','Tagihan ini dianggap sah sebagai kwitansi pembayaran','Konfirmasi pembayaran dengan mengirimkan struk atau bukti transfer lainnya'];
+    termsItems = ['Pelunasan 50% dilakukan maksimal 3 hari setelah invoice ini diterbitkan',
+                  'FREE 2x minor revisi musik & video',
+                  'Final output diserahkan via Google Drive',
+                  'Musik berlisensi (free copyright)',
+                  'Deadline per project max. 30 hari diluar revisi',
+                  'Tagihan ini dianggap sah sebagai kwitansi pembayaran',
+                  'Konfirmasi pembayaran dengan mengirimkan bukti transfer'];
   } else {
-    termsItems = ['Terima kasih karena telah memenuhi pelunasan atas sisa tagihan pada transaksi ini','Pembayaran sudah diterima oleh PIHAK VENDOR dan tagihan ini dianggap sah sebagai kwitansi pembayaran','Adapun syarat dan ketentuan yang telah disepakati akan tetap berlaku hingga project dinyatakan selesai','Semoga kerjasama ini dapat terjalin dalam jangka waktu yang panjang'];
+    termsItems = ['Terima kasih karena telah memenuhi pelunasan atas sisa tagihan pada transaksi ini',
+                  'Pembayaran sudah diterima oleh PIHAK VENDOR dan tagihan ini dianggap sah sebagai kwitansi pembayaran',
+                  'Syarat dan ketentuan yang telah disepakati akan tetap berlaku hingga project dinyatakan selesai',
+                  'Semoga kerjasama ini dapat terjalin dalam jangka waktu yang panjang'];
   }
 
   let noteText = '';
@@ -867,11 +931,11 @@ function sendWA() {
   const tpl = currentTemplate;
   let msg = '';
   if (tpl === 'dp') {
-    msg = `Halo ${v.clientName || 'Kak'},\n\nTerima kasih atas kepercayaan Anda kepada CLARQUEY Video & Film Production 🎬\n\nBerikut kami kirimkan Invoice ${v.invNo} sebagai tagihan Uang Muka (DP) 50% untuk project:\n\n📌 *${v.projTitle || 'Project Anda'}*\n💰 Total Project: ${fmt(v.total)}\n💳 DP 50%: ${fmt(v.dp)}\n\nMohon melakukan pembayaran ke:\n🏦 SMBCI: 90014746343\n👤 JULI ISKANDAR ZAKAT\n\nSilakan kirimkan bukti transfer setelah pembayaran. Terima kasih 🙏\n\n— CLARQUEY Multimedia`;
+    msg = `Halo ${v.clientName || ''},\n\nTerima kasih atas kepercayaan Anda kepada CLARQUEY Video & Film Production 🎬\n\nBerikut kami kirimkan Invoice ${v.invNo} sebagai tagihan Uang Muka (DP) 50% untuk project:\n\n📌 *${v.projTitle || 'Project Anda'}*\n💰 Total Project: ${fmt(v.total)}\n💳 DP 50%: ${fmt(v.dp)}\n\nMohon melakukan pembayaran ke rekening Bank:\n🏦 SMBC Indonesia: 90014746343\n👤 JULI ISKANDAR ZAKAT\n\nSilakan kirimkan bukti transfer setelah pembayaran. Terima kasih 🙏\n\n*CLARQUEY* • Video & Film Production `;
   } else if (tpl === 'pel') {
-    msg = `Halo ${v.clientName || 'Kak'},\n\nProses pengambilan video telah selesai dilaksanakan. Terima kasih atas kerjasamanya 🙏\n\nBerikut kami kirimkan Invoice ${v.invNo} sebagai tagihan Pelunasan untuk project:\n\n📌 *${v.projTitle || 'Project Anda'}*\n💰 Total Project: ${fmt(v.total)}\n✅ DP 50% sudah terbayar: ${fmt(v.dp)}\n💳 Sisa Pelunasan: ${fmt(v.sisa)}\n\nMohon melakukan pelunasan ke:\n🏦 SMBCI: 90014746343\n👤 JULI ISKANDAR ZAKAT\n\nSilakan kirimkan bukti transfer setelah pembayaran. Terima kasih 🙏\n\n— CLARQUEY Multimedia`;
+    msg = `Halo ${v.clientName || ''},\n\nProses pengambilan video telah selesai dilaksanakan. Terima kasih atas kerjasamanya 🙏\n\nBerikut kami kirimkan Invoice ${v.invNo} sebagai tagihan Pelunasan untuk project:\n\n📌 *${v.projTitle || 'Project Anda'}*\n💰 Total Project: ${fmt(v.total)}\n✅ DP 50% sudah terbayar: ${fmt(v.dp)}\n💳 Sisa Pelunasan: ${fmt(v.sisa)}\n\nMohon melakukan pelunasan ke rekening Bank:\n🏦 SMBC Indonesia: 90014746343\n👤 JULI ISKANDAR ZAKAT\n\nSilakan kirimkan bukti transfer setelah pembayaran. Terima kasih 🙏\n\n*CLARQUEY* • Video & Film Production`;
   } else {
-    msg = `Halo ${v.clientName || 'Kak'},\n\nPembayaran project telah kami terima dengan sempurna. Terima kasih! 🎉\n\nBerikut kami kirimkan Invoice ${v.invNo} sebagai kwitansi resmi atas pelunasan penuh untuk project:\n\n📌 *${v.projTitle || 'Project Anda'}*\n✅ Total Settled: ${fmt(v.total)}\n\nProject akan segera kami proses sesuai timeline yang disepakati. Semoga hasilnya memuaskan! 🎬\n\n— CLARQUEY Multimedia`;
+    msg = `Halo ${v.clientName || ''},\n\nPembayaran project telah kami terima dengan sempurna. Terima kasih! 🎉\n\nBerikut kami kirimkan Invoice ${v.invNo} sebagai kwitansi resmi atas pelunasan penuh untuk project:\n\n📌 *${v.projTitle || 'Project Anda'}*\n✅ Total Settled: ${fmt(v.total)}\n\nProject akan segera kami proses sesuai timeline yang disepakati. Semoga hasilnya memuaskan! 🎬\n\n*CLARQUEY* • Video & Film Production`;
   }
 
   window.open(`https://wa.me/${wa}?text=${encodeURIComponent(msg)}`, '_blank');
@@ -892,6 +956,31 @@ function resetForm() {
   fetchLastSeq();
 })();
 </script>
+
+  <div class="bottom-nav">
+
+  <div class="nav-item active" onclick="setTemplate('dp', this)" id="nav-dp">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 1.5L18.5 9H13V3.5zM12 18c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm.5-6v1.79l1.35 1.35-.71.71L11.5 14.2V12h1z"/>
+    </svg>
+    <span>DP 50%</span>
+  </div>
+
+  <div class="nav-item" onclick="setTemplate('pel', this)" id="nav-pel">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
+    </svg>
+    <span>Pelunasan</span>
+  </div>
+
+  <div class="nav-item" onclick="setTemplate('set', this)" id="nav-set">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+    </svg>
+    <span>Settled</span>
+  </div>
+
+</div>
   
 </body>
 </html>

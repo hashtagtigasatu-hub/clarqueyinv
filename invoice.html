@@ -217,11 +217,30 @@ else {
 
   let termsItems = [];
   if (tpl === 'dp') {
-    termsItems = ['Silahkan melakukan pembayaran uang muka sebesar 50% dari seluruh perkiraan biaya selambat-lambatnya 13 (tiga belas) hari sebelum project dimulai','Uang muka tidak dapat ditarik kembali dengan alasan apapun','Sisa pembayaran diharapkan dapat dilunasi 3 (tiga) hari setelah pengambilan video di lapangan selesai','FREE 1x revisi musik & video','Final output diserahkan via Google Drive','Musik berlisensi (free copyright)','Deadline per project max. 30 (tiga puluh) hari diluar revisi','Harga yang tertera berlaku untuk 7 (tujuh) jam kerja dalam 1 (satu) hari','Tagihan ini dianggap sah sebagai kwitansi pembayaran','Konfirmasi pembayaran dengan mengirimkan struk atau bukti transfer lainnya'];
+    termsItems = ['DP 50% dibayarkan selambat-lambatnya 13 hari sebelum project dimulai',
+                  'Uang muka tidak dapat ditarik kembali dengan alasan apapun',
+                  'Pelunasan dilakukan maksimal 3 hari setelah proses syuting',
+                  'FREE 2x minor revisi musik & video',
+                  'Final output diserahkan via Google Drive',
+                  'Musik berlisensi (free copyright)',
+                  'Deadline per project max. 30 hari diluar revisi',
+                  'Harga yang tertera berlaku untuk 7 jam kerja per hari',
+                  'Tagihan ini dianggap sah sebagai kwitansi pembayaran',
+                  'Konfirmasi pembayaran dengan mengirimkan bukti transfer'];
+    
   } else if (tpl === 'pel') {
-    termsItems = ['Silahkan melakukan pelunasan sisa tagihan sebesar 50% dari seluruh perkiraan biaya selambat-lambatnya 3 (tiga) hari setelah invoice ini diterbitkan','FREE 1x revisi musik & video','Final output diserahkan via Google Drive','Musik berlisensi (free copyright)','Deadline per project max. 30 (tiga puluh) hari diluar revisi','Tagihan ini dianggap sah sebagai kwitansi pembayaran','Konfirmasi pembayaran dengan mengirimkan struk atau bukti transfer lainnya'];
+    termsItems = ['Pelunasan 50% dilakukan maksimal 3 hari setelah invoice ini diterbitkan',
+                  'FREE 2x minor revisi musik & video',
+                  'Final output diserahkan via Google Drive',
+                  'Musik berlisensi (free copyright)',
+                  'Deadline per project max. 30 hari diluar revisi',
+                  'Tagihan ini dianggap sah sebagai kwitansi pembayaran',
+                  'Konfirmasi pembayaran dengan mengirimkan bukti transfer'];
   } else {
-    termsItems = ['Terima kasih karena telah memenuhi pelunasan atas sisa tagihan pada transaksi ini','Pembayaran sudah diterima oleh PIHAK VENDOR dan tagihan ini dianggap sah sebagai kwitansi pembayaran','Adapun syarat dan ketentuan yang telah disepakati akan tetap berlaku hingga project dinyatakan selesai','Semoga kerjasama ini dapat terjalin dalam jangka waktu yang panjang'];
+    termsItems = ['Terima kasih karena telah memenuhi pelunasan atas sisa tagihan pada transaksi ini',
+                  'Pembayaran sudah diterima oleh PIHAK VENDOR dan tagihan ini dianggap sah sebagai kwitansi pembayaran',
+                  'Syarat dan ketentuan yang telah disepakati akan tetap berlaku hingga project dinyatakan selesai',
+                  'Semoga kerjasama ini dapat terjalin dalam jangka waktu yang panjang'];
   }
 
   let noteText = '';
@@ -272,7 +291,7 @@ else {
       </div>
     </div>
     <div class="inv-terms">
-      <div class="inv-section-title">Term &amp; Condition</div>
+      <div class="inv-section-title">Terms &amp; Condition</div>
       <ul class="inv-terms-list">${termsItems.map(t => `<li>${t}</li>`).join('')}</ul>
     </div>
     <div class="inv-note">

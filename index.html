@@ -808,13 +808,13 @@ async function fetchLastSeq() {
     autoYY = String(today.getFullYear()).slice(-2);
 
     if (json.status === 'ok' && json.lastNo) {
-      // Parse nomor terakhir: CQ-MMYY-001
-      const parts = json.lastNo.split('-');
-      const lastSeq = parseInt(parts[2]) || 0;
-      autoSeq = String(lastSeq + 1).padStart(3, '0');
-    } else {
-      autoSeq = '001';
-    }
+  const cleanNo = String(json.lastNo).replace(/-DP$|-PEL$|-SET$/i, '');
+  const parts   = cleanNo.split('-');
+  const lastSeq = parseInt(parts[2]) || 0;
+  autoSeq = String(lastSeq + 1).padStart(3, '0');
+} else {
+  autoSeq = '001';
+}
 
     document.getElementById('inv-seq').value = '';
     updateInvoiceNo();

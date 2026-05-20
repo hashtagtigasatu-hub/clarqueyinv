@@ -631,6 +631,30 @@ body {
   color: var(--text-muted);
   text-align: center;
 } 
+
+  .search-wrap input {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  padding: 14px 16px;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.search-wrap input:focus {
+  border-color: var(--accent);
+  background: #323232;
+}
+
+.search-wrap input::placeholder {
+  color: var(--text-muted);
+}
   
 </style>
 
@@ -666,7 +690,7 @@ body {
 <div class="section-label" id="label-search" style="display:none">Cari Data DP</div>
 
 <div class="search-wrap" id="search-wrap" style="display:none">
-  <input type="text" id="search-input" placeholder="Ketik nama client..."
+  <input type="text" id="search-input" placeholder="Ketik nama client"
     oninput="onSearchInput(this.value)" autocomplete="off">
   <div class="search-dropdown" id="search-dropdown"></div>
 </div>

@@ -1012,7 +1012,7 @@ async function saveToSheets() {
   const tplLabel = { dp:'DP 50%', pel:'Pelunasan', set:'Settled' }[currentTemplate];
   const payload = {
     invoiceNo: v.invNo, tanggal: v.invDate, clientName: v.clientName,
-    clientWA: v.clientWA, projTitle: v.projTitle, total: v.total,
+    clientWA: v.clientWA, projTitle: v.projTitle, projDetail: v.projDetail, total: v.total,
     dp: v.dp, sisa: v.sisa, template: tplLabel
   };
   try {

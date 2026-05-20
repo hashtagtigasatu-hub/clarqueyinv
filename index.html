@@ -575,6 +575,62 @@ body {
   overscroll-behavior: none;
   -webkit-overflow-scrolling: touch;
 }
+
+ /* ── CLIENT SEARCH ── */
+.search-wrap { position: relative; margin-bottom: 12px; }
+
+.search-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0; right: 0;
+  background: var(--surface);
+  border: 1px solid var(--accent-dim);
+  border-radius: var(--radius);
+  z-index: 50;
+  overflow: hidden;
+  display: none;
+}
+
+.search-dropdown.visible { display: block; }
+
+.search-item {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.search-item:last-child { border-bottom: none; }
+.search-item:active { background: var(--surface2); }
+
+.search-item-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 3px;
+}
+
+.search-item-meta {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-family: 'DM Sans', sans-serif;
+  line-height: 1.6;
+}
+
+.search-empty {
+  padding: 14px 16px;
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.search-loading {
+  padding: 14px 16px;
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: center;
+} 
   
 </style>
 
@@ -607,6 +663,14 @@ body {
   <input type="text" id="inv-seq" maxlength="3" placeholder="001" oninput="overrideSeq()">
 </div>
 
+<div class="section-label" id="label-search" style="display:none">Cari Data DP</div>
+
+<div class="search-wrap" id="search-wrap" style="display:none">
+  <input type="text" id="search-input" placeholder="Ketik nama client..."
+    oninput="onSearchInput(this.value)" autocomplete="off">
+  <div class="search-dropdown" id="search-dropdown"></div>
+</div>
+  
   <div class="section-label">Data Client</div>
 
   <div class="field">
@@ -685,9 +749,14 @@ const tplDescs = {
 
 function setTemplate(tpl, el) {
   currentTemplate = tpl;
-  // Update nav active state
   document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
   document.getElementById('nav-' + tpl).classList.add('active');
+
+  // Show search hanya untuk Pelunasan dan Settled
+  const showSearch = tpl === 'pel' || tpl === 'set';
+  document.getElementById('search-wrap').style.display  = showSearch ? 'block' : 'none';
+  document.getElementById('label-search').style.display = showSearch ? 'block' : 'none';
+
   updateCalc();
 }
 
@@ -971,6 +1040,86 @@ function sendWA() {
   window.open(`https://wa.me/${wa}?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
+  let searchTimer = null;
+
+function onSearchInput(val) {
+  clearTimeout(searchTimer);
+  const dd = document.getElementById('search-dropdown');
+
+  if (val.length < 2) {
+    dd.innerHTML = '';
+    dd.classList.remove('visible');
+    return;
+  }
+
+  dd.innerHTML = '<div class="search-loading">Mencari...</div>';
+  dd.classList.add('visible');
+
+  searchTimer = setTimeout(() => doSearch(val), 600);
+}
+
+async function doSearch(query) {
+  const dd = document.getElementById('search-dropdown');
+  try {
+    const res  = await fetch(`${APPS_SCRIPT_URL}?action=search&q=${encodeURIComponent(query)}`);
+    const json = await res.json();
+
+    if (!json.results || json.results.length === 0) {
+      dd.innerHTML = '<div class="search-empty">Tidak ada data DP ditemukan</div>';
+      return;
+    }
+
+    dd.innerHTML = json.results.map((r, i) => `
+      <div class="search-item" onclick="selectClient(${i})">
+        <div class="search-item-name">${r.clientName}</div>
+        <div class="search-item-meta">
+          ${r.invoiceNo} &nbsp;•&nbsp; ${r.tanggal}<br>
+          ${r.projTitle} &nbsp;•&nbsp; Rp ${Number(r.total).toLocaleString('id-ID')}
+        </div>
+      </div>
+    `).join('');
+
+    // Simpan hasil ke variable global
+    window._searchResults = json.results;
+
+  } catch(err) {
+    dd.innerHTML = '<div class="search-empty">Gagal mengambil data</div>';
+  }
+}
+
+function selectClient(idx) {
+  const r  = window._searchResults[idx];
+  const dd = document.getElementById('search-dropdown');
+
+  // Auto-fill semua field
+  document.getElementById('client-name').value  = r.clientName;
+  document.getElementById('client-wa').value    = r.clientWA;
+  document.getElementById('proj-title').value   = r.projTitle;
+  document.getElementById('proj-detail').value  = r.projDetail || '';
+  document.getElementById('total-price').value  = r.total;
+
+  // Set nomor invoice — ambil base number dari DP, hapus suffix -DP
+  const baseNo = r.invoiceNo.replace('-DP', '');
+  const parts  = baseNo.split('-'); // ['CQ', '0526', '001']
+  if (parts.length >= 3) {
+    document.getElementById('inv-seq').value = parts[2];
+    // Update MM YY dari nomor invoice DP
+    autoMM = parts[1].slice(0, 2);
+    autoYY = parts[1].slice(2, 4);
+  }
+
+  // Set tanggal hari ini untuk invoice baru
+  const today = new Date();
+  document.getElementById('inv-date').value = today.toISOString().split('T')[0];
+
+  // Tutup dropdown
+  dd.classList.remove('visible');
+  document.getElementById('search-input').value = r.clientName;
+
+  updateInvoiceNo();
+  updateCalc();
+}
+
 function resetForm() {
   if (!confirm('Reset semua isian?')) return;
   document.querySelectorAll('input, textarea').forEach(el => el.value = '');
@@ -985,6 +1134,7 @@ function resetForm() {
   updateCalc();
   fetchLastSeq();
 })();
+  
 </script>
 
   <div class="bottom-nav">
